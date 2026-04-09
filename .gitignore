@@ -1,0 +1,21 @@
+# =============== #
+# Unity Folders   #
+# =============== #
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Uu]serSettings/
+
+# ================================== #
+# Visual Studio / Rider specific   #
+# ================================== #
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
