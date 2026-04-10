@@ -1636,7 +1636,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c676e174d946da4587f8682fd4130d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
-  player: {fileID: 1174327751}
+  player: {fileID: 1174327757}
+  rotationSpeed: 5
 --- !u!1001 &339243438
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5421,6 +5422,46 @@ PrefabInstance:
       propertyPath: m_ApplyRootMotion
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -8.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -6.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.50158674
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.041919846
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.5198784
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.69020283
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 42.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -51.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5302071779287464465, guid: 71338a9146fc147468069b6d56541348, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 86.6
+      objectReference: {fileID: 0}
     - target: {fileID: 7192529216542845986, guid: 71338a9146fc147468069b6d56541348, type: 3}
       propertyPath: m_Name
       value: Player
@@ -5567,6 +5608,11 @@ MonoBehaviour:
   animator: {fileID: 1174327754}
   cameraTransform: {fileID: 330585546}
   rotationSpeed: 7
+--- !u!4 &1174327757 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7537670741518972568, guid: 71338a9146fc147468069b6d56541348, type: 3}
+  m_PrefabInstance: {fileID: 1174327750}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1178653845
 PrefabInstance:
   m_ObjectHideFlags: 0
