@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 412409098448830873}
   - component: {fileID: 8100317865853355987}
   - component: {fileID: 5573840320444706886}
-  m_Layer: 0
-  m_Name: Table1
+  m_Layer: 8
+  m_Name: Table_Round
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

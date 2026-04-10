@@ -22,7 +22,7 @@ public class CameraController : MonoBehaviour
     void LateUpdate()
     {
         // 3. 입력 받기 (마우스 클릭 또는 터치 스와이프)
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(1))
         {
             if (!IsPointerOverUIObject())
             {
