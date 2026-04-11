@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 // 채집물 종류
-public enum ItemType { Wood, Leather, Fruit, Flower, Mushroom, Meat }
+public enum ItemType { Wood, Leather, Flower, Fruit, Mushroom, Meat }
 
 [System.Serializable]
 public class CraftingRecipe
@@ -15,9 +17,9 @@ public class CraftingRecipe
     public int reqLeather = 0;
 }
 
-public class SurvivalSystemManager : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
-    public static SurvivalSystemManager instance;
+    public static GameManager instance;
 
     // 아이템 수량이 변동될 때 UIManager에게 알려주기 위한 이벤트
     public event Action OnInventoryChanged;
@@ -32,6 +34,17 @@ public class SurvivalSystemManager : MonoBehaviour
     public int currentHunger = 200;
     public int maxMental = 200;
     public int currentMental = 200;
+
+    [Header("UI 갱신 오브젝트 연결")]
+    public TextMeshProUGUI hp_Text;
+    public TextMeshProUGUI hunger_Text;
+    public TextMeshProUGUI mantal_Text;
+
+    public Image hp_Bar_Image;
+    public Image hunger_Bar_Image;
+    public Image mantal_Bar_Image;
+
+
 
     [Header("Inventory (Resources - Max 99)")]
     public Dictionary<ItemType, int> inventory = new Dictionary<ItemType, int>();
@@ -50,12 +63,17 @@ public class SurvivalSystemManager : MonoBehaviour
         InitializeRecipes();
     }
 
+    private void Start()
+    {
+        StatusUpdate();
+    }
+
     private void InitializeInventory()
     {
         inventory[ItemType.Wood] = 50;
         inventory[ItemType.Leather] = 0;
-        inventory[ItemType.Fruit] = 0;
         inventory[ItemType.Flower] = 0;
+        inventory[ItemType.Fruit] = 0;
         inventory[ItemType.Mushroom] = 0;
         inventory[ItemType.Meat] = 0;
     }
@@ -99,7 +117,8 @@ public class SurvivalSystemManager : MonoBehaviour
         ModifyItem(ItemType.Leather, -recipe.reqLeather);
 
     }
-    public bool PossibleTest(FurnitureType type)
+    //제작 UI 생선전 테스트
+    public bool PossibleTest(FurnitureType type) 
     {
         CraftingRecipe recipe = recipes[type];
 
@@ -195,5 +214,30 @@ public class SurvivalSystemManager : MonoBehaviour
     {
         if (currentHealth <= 0) Debug.Log("체력이 0이 되어 사망했습니다.");
         else if (day > maxDay) Debug.Log("100일 생존에 성공했습니다!");
+    }
+
+
+    
+
+    public void StatusUpdate()// 체력, 정신력, 멘탈을 회복하는 요소가 있을때만 발동하는 함수로 Butten으로 값이 변하는 경우에는 이놈을 부르면 되는걸로.
+    {
+
+        hp_Text.text = currentHealth.ToString();
+        hunger_Text.text = currentHunger.ToString();
+        mantal_Text.text = currentMental.ToString();
+
+        if (hp_Bar_Image != null)
+        {
+            hp_Bar_Image.fillAmount = currentHealth / maxHealth;
+        }
+
+        if (mantal_Bar_Image != null)
+        {
+            mantal_Bar_Image.fillAmount =currentMental / maxMental;
+        }
+        if (hunger_Bar_Image != null)
+        {
+            hunger_Bar_Image.fillAmount = currentHunger / maxHunger;
+        }
     }
 }

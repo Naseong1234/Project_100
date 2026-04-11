@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using TMPro; // 추가됨!
 using System.Text; // 추가됨!
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -14,8 +15,8 @@ public class UIManager : MonoBehaviour
     [Header("Inventory UI (인스펙터에서 연결해주세요)")]
     public TextMeshProUGUI woodText;
     public TextMeshProUGUI leatherText;
-    public TextMeshProUGUI fruitText;
     public TextMeshProUGUI flowerText;
+    public TextMeshProUGUI fruitText;
     public TextMeshProUGUI mushroomText;
     public TextMeshProUGUI meatText;
 
@@ -39,20 +40,25 @@ public class UIManager : MonoBehaviour
     {
         if (mainCamera == null) mainCamera = Camera.main;
 
-        // SurvivalSystemManager의 이벤트에 연결하여, 아이템이 바뀔 때마다 자동으로 UI가 갱신되게 만듭니다.
-        if (SurvivalSystemManager.instance != null)
+        // GameManager의 이벤트에 연결하여, 아이템이 바뀔 때마다 자동으로 UI가 갱신되게 만듭니다.
+        if (GameManager.instance != null)
         {
-            SurvivalSystemManager.instance.OnInventoryChanged += UpdateInventoryUI;
+            GameManager.instance.OnInventoryChanged += UpdateInventoryUI;
             UpdateInventoryUI(); // 게임 시작 시 초기화
         }
+    }
+
+    void Update()
+    {
+        
     }
 
     private void OnDestroy()
     {
         // 씬이 넘어가거나 오브젝트가 파괴될 때 이벤트 연결을 해제해줍니다. (메모리 누수 방지)
-        if (SurvivalSystemManager.instance != null)
+        if (GameManager.instance != null)
         {
-            SurvivalSystemManager.instance.OnInventoryChanged -= UpdateInventoryUI;
+            GameManager.instance.OnInventoryChanged -= UpdateInventoryUI;
         }
     }
 
@@ -62,21 +68,21 @@ public class UIManager : MonoBehaviour
 
     public void UpdateInventoryUI()
     {
-        var inv = SurvivalSystemManager.instance.inventory;
+        var inv = GameManager.instance.inventory;
         if (woodText) woodText.text = $"{inv[ItemType.Wood]}";
         if (leatherText) leatherText.text = $"{inv[ItemType.Leather]}";
-        if (fruitText) fruitText.text = $"{inv[ItemType.Fruit]}";
         if (flowerText) flowerText.text = $"{inv[ItemType.Flower]}";
+        if (fruitText) fruitText.text = $"{inv[ItemType.Fruit]}";
         if (mushroomText) mushroomText.text = $"{inv[ItemType.Mushroom]}";
         if (meatText) meatText.text = $"{inv[ItemType.Meat]}";
     }
 
     public void ShowCraftingConditionUI(FurnitureType type)
     {
-        if (!SurvivalSystemManager.instance.recipes.ContainsKey(type)) return;
+        if (!GameManager.instance.recipes.ContainsKey(type)) return;
 
-        CraftingRecipe recipe = SurvivalSystemManager.instance.recipes[type];
-        var inv = SurvivalSystemManager.instance.inventory;
+        CraftingRecipe recipe = GameManager.instance.recipes[type];
+        var inv = GameManager.instance.inventory;
         StringBuilder sb = new StringBuilder();
 
         // 1. 나무 조건 체크
@@ -120,7 +126,7 @@ public class UIManager : MonoBehaviour
     public void CraftFurnitureAction()
     {
         FurnitureType typeToCraft = (FurnitureType)typeIndex;
-        SurvivalSystemManager.instance.TryConsumeMaterials(typeToCraft);
+        GameManager.instance.TryConsumeMaterials(typeToCraft);
 
         // 재료 소모에 성공했을 때만 생성!
         Vector3 spawnPos = player.position + player.forward * spawnDistance;
@@ -147,7 +153,7 @@ public class UIManager : MonoBehaviour
     {
         FurnitureType typeToCraft = (FurnitureType)typeIndex;
 
-        if (SurvivalSystemManager.instance.PossibleTest(typeToCraft))
+        if (GameManager.instance.PossibleTest(typeToCraft))
         {
             UIinput.SetActive(true);
         }
@@ -157,6 +163,8 @@ public class UIManager : MonoBehaviour
 
         }
     }
+
+    
 
 
     // ==========================================
