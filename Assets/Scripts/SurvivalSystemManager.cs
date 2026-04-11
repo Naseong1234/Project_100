@@ -1,194 +1,199 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+
+// 채집물 종류
+public enum ItemType { Wood, Leather, Fruit, Flower, Mushroom, Meat }
+
+[System.Serializable]
+public class CraftingRecipe
+{
+    public FurnitureType furnitureType;
+    public int maxAmount; // 최대 제작 가능 수량
+    public int reqWood = 0;
+    public int reqLeather = 0;
+}
 
 public class SurvivalSystemManager : MonoBehaviour
 {
+    public static SurvivalSystemManager instance;
+
+    // 아이템 수량이 변동될 때 UIManager에게 알려주기 위한 이벤트
+    public event Action OnInventoryChanged;
+
     [Header("Survival Stats")]
     public int day = 1;
-    public int maxHealth = 100;
-    public int currentHealth = 100;
-    public int currentHunger = 100;
-    public int currentSanity = 100;
+    public int maxDay = 100;
 
-    [Header("Inventory (Resources)")]
-    public int wood = 0;
-    public int branch = 0;
-    public int stone = 0;
-    public int mushroom = 0;
-    public int flower = 0; // 정신력 상승을 위해 바로 소비할 수도 있지만 일단 인벤토리 처리
-    public int meat = 0;
-    public int fruit = 0;
-    public int edibleGrass = 0;
+    public int maxHealth = 200;
+    public int currentHealth = 200;
+    public int maxHunger = 200;
+    public int currentHunger = 200;
+    public int maxMental = 200;
+    public int currentMental = 200;
+
+    [Header("Inventory (Resources - Max 99)")]
+    public Dictionary<ItemType, int> inventory = new Dictionary<ItemType, int>();
+    public const int MAX_ITEM_CAPACITY = 99;
+
+    // UIManager에서 접근할 수 있도록 public으로 열어둡니다.
+    public Dictionary<FurnitureType, CraftingRecipe> recipes = new Dictionary<FurnitureType, CraftingRecipe>();
 
     private bool isExploring = false;
 
-    // 하루의 시작 (플레이어가 모험 또는 내실을 선택했을 때 호출)
-    public void StartNewDay(bool chooseExplore)
+    private void Awake()
     {
-        if (isExploring) return; // 이미 진행 중이면 무시
+        if (instance == null) instance = this;
 
-        Debug.Log($"--- Day {day} 시작 ---");
-
-        if (chooseExplore)
-        {
-            StartCoroutine(ExploreRoutine());
-        }
-        else
-        {
-            MaintainBase();
-            EndDay(false);
-        }
+        InitializeInventory();
+        InitializeRecipes();
     }
 
-    // 모험 선택 시 (8분 = 480초 동안 진행)
+    private void InitializeInventory()
+    {
+        inventory[ItemType.Wood] = 50;
+        inventory[ItemType.Leather] = 0;
+        inventory[ItemType.Fruit] = 0;
+        inventory[ItemType.Flower] = 0;
+        inventory[ItemType.Mushroom] = 0;
+        inventory[ItemType.Meat] = 0;
+    }
+
+    private void InitializeRecipes()
+    {
+        recipes.Add(FurnitureType.Barrel_Small, new CraftingRecipe { furnitureType = FurnitureType.Barrel_Small, maxAmount = 1, reqWood = 10 });
+        recipes.Add(FurnitureType.Barrel_Big, new CraftingRecipe { furnitureType = FurnitureType.Barrel_Big, maxAmount = 1, reqWood = 15 });
+        recipes.Add(FurnitureType.Barrel_drink, new CraftingRecipe { furnitureType = FurnitureType.Barrel_drink, maxAmount = 1, reqWood = 10 });
+
+        recipes.Add(FurnitureType.Tent_Small, new CraftingRecipe { furnitureType = FurnitureType.Tent_Small, maxAmount = 1, reqWood = 5, reqLeather = 10 });
+        recipes.Add(FurnitureType.Tent_Big, new CraftingRecipe { furnitureType = FurnitureType.Tent_Big, maxAmount = 1, reqWood = 10, reqLeather = 15 });
+        recipes.Add(FurnitureType.Tent_Rest, new CraftingRecipe { furnitureType = FurnitureType.Tent_Rest, maxAmount = 1, reqWood = 10, reqLeather = 10 });
+
+        recipes.Add(FurnitureType.Boxs, new CraftingRecipe { furnitureType = FurnitureType.Boxs, maxAmount = 1, reqWood = 20 });
+
+        recipes.Add(FurnitureType.Chair1, new CraftingRecipe { furnitureType = FurnitureType.Chair1, maxAmount = 4, reqWood = 10 });
+        recipes.Add(FurnitureType.Chair2, new CraftingRecipe { furnitureType = FurnitureType.Chair2, maxAmount = 4, reqWood = 15 });
+
+        recipes.Add(FurnitureType.Table_Small, new CraftingRecipe { furnitureType = FurnitureType.Table_Small, maxAmount = 1, reqWood = 20 });
+        recipes.Add(FurnitureType.Table_Big, new CraftingRecipe { furnitureType = FurnitureType.Table_Big, maxAmount = 1, reqWood = 30 });
+        recipes.Add(FurnitureType.Table_Round, new CraftingRecipe { furnitureType = FurnitureType.Table_Round, maxAmount = 1, reqWood = 20 });
+    }
+
+    // 아이템 획득/소비 (데이터 처리 후 UI 이벤트 호출)
+    public void ModifyItem(ItemType type, int amount)
+    {
+        inventory[type] += amount;
+        inventory[type] = Mathf.Clamp(inventory[type], 0, MAX_ITEM_CAPACITY);
+
+        // 데이터가 바뀌었으니 UI를 업데이트 하라고 신호를 보냅니다.
+        OnInventoryChanged?.Invoke();
+    }
+
+    // 실제 제작 시 호출할 함수 (재료 차감)
+    public void TryConsumeMaterials(FurnitureType type)
+    {
+        CraftingRecipe recipe = recipes[type];
+
+        ModifyItem(ItemType.Wood, -recipe.reqWood);
+        ModifyItem(ItemType.Leather, -recipe.reqLeather);
+
+    }
+    public bool PossibleTest(FurnitureType type)
+    {
+        CraftingRecipe recipe = recipes[type];
+
+        if (inventory[ItemType.Wood] < recipe.reqWood) return false;
+        if (inventory[ItemType.Leather] < recipe.reqLeather) return false;
+        if (FurnitureController.instance.GetPlayerFurnitureCount(type) >= recipe.maxAmount) return false;
+
+        return true;
+    }
+
+
+
+    // 생존/모험 로직
+    public void StartNewDay(bool chooseExplore)
+    {
+        if (isExploring) return;
+        if (chooseExplore) StartCoroutine(ExploreRoutine());
+        else { MaintainBase(); EndDay(false); }
+    }
+
     private IEnumerator ExploreRoutine()
     {
         isExploring = true;
-        Debug.Log("모험을 시작합니다. (현실 시간 8분 소요)");
-
-        // 8분(480초) 진행. 테스트를 위해 시간 배속을 하려면 이 부분을 수정하세요.
-        float exploreTime = 480f;
+        float exploreTime = 5f;
         float elapsedTime = 0f;
-
-        // 1분(60초)마다 랜덤 이벤트 발생 (총 8회)
-        float eventInterval = 60f;
+        float eventInterval = 1f;
         float nextEventTime = eventInterval;
 
         while (elapsedTime < exploreTime)
         {
             elapsedTime += Time.deltaTime;
-
             if (elapsedTime >= nextEventTime)
             {
                 TriggerRandomEncounter();
                 nextEventTime += eventInterval;
             }
-
             yield return null;
         }
 
-        Debug.Log("모험을 무사히 마치고 돌아왔습니다.");
         isExploring = false;
-        EndDay(true); // 모험을 했으므로 true 전달
+        EndDay(true);
     }
 
-    // 랜덤 채집/사냥 이벤트
     private void TriggerRandomEncounter()
     {
-        int randomEncounter = Random.Range(0, 5); // 0~4
+        int randomEncounter = UnityEngine.Random.Range(0, 6);
         switch (randomEncounter)
         {
-            case 0: // 나무
-                wood++;
-                branch++;
-                fruit++;
-                Debug.Log("나무를 벌목했습니다. (나무+1, 나뭇가지+1, 과일+1)");
-                break;
-            case 1: // 돌
-                stone++;
-                Debug.Log("돌을 캤습니다. (돌+1)");
-                break;
-            case 2: // 버섯
-                mushroom++;
-                Debug.Log("버섯을 채집했습니다. (버섯+1)");
-                break;
-            case 3: // 꽃
-                currentSanity = Mathf.Clamp(currentSanity + 2, 0, 100);
-                Debug.Log("꽃을 채집하여 향기를 맡았습니다. (정신력 +2)");
-                break;
-            case 4: // 동물
-                meat++;
-                Debug.Log("동물을 사냥했습니다. (고기+1)");
-                break;
+            case 0: ModifyItem(ItemType.Wood, 1); ModifyItem(ItemType.Fruit, 1); break;
+            case 1: ModifyItem(ItemType.Leather, 1); break;
+            case 2: ModifyItem(ItemType.Mushroom, 1); break;
+            case 3: ModifyItem(ItemType.Flower, 1); currentMental = Mathf.Clamp(currentMental + 2, 0, maxMental); break;
+            case 4: ModifyItem(ItemType.Meat, 1); break;
         }
     }
 
-    // 내실 선택 시
-    private void MaintainBase()
-    {
-        Debug.Log("오늘은 캠프에 남아 내실을 다집니다.");
-        // 가구 제작 등의 로직을 여기에 추가할 수 있습니다.
-    }
+    private void MaintainBase() { /* 내실 다지기 */ }
 
-    // 하루 종료 및 스탯 정산
     private void EndDay(bool didExplore)
     {
-        // 1. 기본 스탯 감소
         currentHealth -= 5;
         currentHunger -= 5;
-        currentSanity -= 5;
+        currentMental -= 5;
 
-        // 2. 모험/내실에 따른 추가 감소
-        if (didExplore)
-        {
-            currentHealth -= 5;
-            currentHunger -= 5;
-        }
+        if (didExplore) { currentHealth -= 5; currentHunger -= 5; }
 
-        // 3. 허기에 따른 체력 회복
         if (currentHunger >= 80) currentHealth += 15;
         else if (currentHunger >= 50) currentHealth += 10;
         else currentHealth += 5;
 
-        // 4. 최대 체력 변동 (허기 & 정신력 조건)
-        if (currentHunger >= 80 && currentSanity >= 80)
-        {
-            maxHealth += 1;
-        }
-        else if (currentHunger >= 50 && currentHunger <= 80 && currentSanity >= 50 && currentSanity <= 80)
-        {
-            // 50~80 유지 시 변동 없음
-            maxHealth += 0;
-        }
-        else
-        {
-            // 그 외 모든 경우
-            maxHealth -= 1;
-        }
-
-        // 최대치를 넘거나 0 이하로 떨어지지 않도록 보정
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-        currentHunger = Mathf.Clamp(currentHunger, 0, 100);
-        currentSanity = Mathf.Clamp(currentSanity, 0, 100);
+        currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
+        currentMental = Mathf.Clamp(currentMental, 0, maxMental);
 
         CheckGameOver();
-
         day++;
     }
 
-    // 음식 섭취 함수 (UI 버튼 등에서 호출)
-    public void EatFood(string foodType)
+    public void EatFood(ItemType foodType)
     {
+        if (inventory[foodType] <= 0) return;
+
         switch (foodType)
         {
-            case "Mushroom":
-                if (mushroom > 0) { mushroom--; currentHunger += 2; }
-                break;
-            case "EdibleGrass":
-                if (edibleGrass > 0) { edibleGrass--; currentHunger += 2; }
-                break;
-            case "Fruit":
-                if (fruit > 0) { fruit--; currentHunger += 5; }
-                break;
-            case "Meat":
-                if (meat > 0) { meat--; currentHunger += 10; }
-                break;
+            case ItemType.Mushroom: ModifyItem(foodType, -1); currentHunger += 2; break;
+            case ItemType.Fruit: ModifyItem(foodType, -1); currentHunger += 5; break;
+            case ItemType.Meat: ModifyItem(foodType, -1); currentHunger += 10; break;
         }
-        currentHunger = Mathf.Clamp(currentHunger, 0, 100);
+        currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
     }
 
-    // 생존/사망 판정
     private void CheckGameOver()
     {
-        if (currentHealth <= 0)
-        {
-            Debug.Log("체력이 0이 되어 사망했습니다. Game Over.");
-            // 게임 오버 처리 로직
-        }
-        else if (day >= 100)
-        {
-            Debug.Log("100일 생존에 성공했습니다! 상금 획득!");
-            // 게임 클리어 처리 로직
-        }
+        if (currentHealth <= 0) Debug.Log("체력이 0이 되어 사망했습니다.");
+        else if (day > maxDay) Debug.Log("100일 생존에 성공했습니다!");
     }
 }

@@ -1,145 +1,234 @@
 using UnityEngine;
-using UnityEngine.EventSystems; // UI 터치 충돌 방지용
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using TMPro; // 추가됨!
+using System.Text; // 추가됨!
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
     [Header("필수 연결 세팅")]
-    public Transform player;      // 캐릭터 위치 기준점
-    public Camera mainCamera;     // 레이를 쏠 메인 카메라
+    public Transform player;
+    public Camera mainCamera;
+
+    [Header("Inventory UI (인스펙터에서 연결해주세요)")]
+    public TextMeshProUGUI woodText;
+    public TextMeshProUGUI leatherText;
+    public TextMeshProUGUI fruitText;
+    public TextMeshProUGUI flowerText;
+    public TextMeshProUGUI mushroomText;
+    public TextMeshProUGUI meatText;
+
+    [Header("Crafting UI")]
+    public TextMeshProUGUI craftingConditionText;
 
     [Header("제작(Crafting) 설정")]
-    public float spawnDistance = 2.5f; // 캐릭터 앞 어느 정도 거리에 생성할지
+    public float spawnDistance = 2.5f;
+    private int typeIndex = 0;
 
     [Header("수정(Edit) 설정")]
-    public LayerMask furnitureLayer; // 가구만 콕 집어서 선택하기 위한 레이어
+    public LayerMask furnitureLayer;
+    public float rotSpeed = 0.5f;
 
-    private bool isEditMode = false;           // 현재 수정 모드인지 상태 저장
-    private GameObject selectedFurniture = null; // 현재 마우스로 잡고 있는 가구
-    private Plane dragPlane;                   // Y축을 고정하고 드래그하기 위한 가상의 수학적 평면
+    private bool isEditMode = false;
+    private GameObject selectedFurniture = null;
+    private Plane dragPlane;
+    private Vector2 pointerPosition;
 
     void Start()
     {
         if (mainCamera == null) mainCamera = Camera.main;
+
+        // SurvivalSystemManager의 이벤트에 연결하여, 아이템이 바뀔 때마다 자동으로 UI가 갱신되게 만듭니다.
+        if (SurvivalSystemManager.instance != null)
+        {
+            SurvivalSystemManager.instance.OnInventoryChanged += UpdateInventoryUI;
+            UpdateInventoryUI(); // 게임 시작 시 초기화
+        }
     }
 
-    void Update()
+    private void OnDestroy()
     {
-        // 1. 수정 모드가 켜져 있을 때만 마우스/터치 드래그 기능 작동
-        if (isEditMode)
+        // 씬이 넘어가거나 오브젝트가 파괴될 때 이벤트 연결을 해제해줍니다. (메모리 누수 방지)
+        if (SurvivalSystemManager.instance != null)
         {
-            HandleFurnitureDrag();
+            SurvivalSystemManager.instance.OnInventoryChanged -= UpdateInventoryUI;
         }
     }
 
     // ==========================================
-    //  [기능 1] 가구 제작 버튼에 연결할 함수
+    //  [기능 1] 인벤토리 및 조건 UI 갱신 (추가된 부분)
     // ==========================================
 
-    /// <summary>
-    /// UI의 제작 버튼을 눌렀을 때 실행됩니다.
-    /// 유니티 버튼 OnClick 이벤트에서는 Enum을 바로 넣기 어려우므로 int(숫자)로 받습니다.
-    /// (예: 0 = Barrel_Small, 1 = Barrel_Big...)
-    /// </summary>
-    public void CraftFurnitureAction(int typeIndex)
+    public void UpdateInventoryUI()
     {
-        // 숫자를 가구 타입 Enum으로 변환
+        var inv = SurvivalSystemManager.instance.inventory;
+        if (woodText) woodText.text = $"{inv[ItemType.Wood]}";
+        if (leatherText) leatherText.text = $"{inv[ItemType.Leather]}";
+        if (fruitText) fruitText.text = $"{inv[ItemType.Fruit]}";
+        if (flowerText) flowerText.text = $"{inv[ItemType.Flower]}";
+        if (mushroomText) mushroomText.text = $"{inv[ItemType.Mushroom]}";
+        if (meatText) meatText.text = $"{inv[ItemType.Meat]}";
+    }
+
+    public void ShowCraftingConditionUI(FurnitureType type)
+    {
+        if (!SurvivalSystemManager.instance.recipes.ContainsKey(type)) return;
+
+        CraftingRecipe recipe = SurvivalSystemManager.instance.recipes[type];
+        var inv = SurvivalSystemManager.instance.inventory;
+        StringBuilder sb = new StringBuilder();
+
+        // 1. 나무 조건 체크
+        if (recipe.reqWood > 0)
+        {
+            int currentWood = inv[ItemType.Wood];
+            string ox = currentWood >= recipe.reqWood ? "O" : "X";
+            sb.AppendLine($"Wood need : {recipe.reqWood} / current : {currentWood} = {ox}");
+        }
+
+        // 2. 가죽 조건 체크
+        if (recipe.reqLeather > 0)
+        {
+            int currentLeather = inv[ItemType.Leather];
+            string ox = currentLeather >= recipe.reqLeather ? "O" : "X";
+            sb.AppendLine($"Leather need : {recipe.reqLeather} / current : {currentLeather} = {ox}");
+        }
+
+        // 3. 수량 조건 체크
+        int currentCount = FurnitureController.instance.GetPlayerFurnitureCount(type);
+        string countOX = currentCount < recipe.maxAmount ? "O" : "X";
+        sb.AppendLine($"Max Amount = {recipe.maxAmount} / current : {currentCount} = {countOX}");
+
+        if (craftingConditionText != null)
+        {
+            craftingConditionText.text = sb.ToString();
+        }
+    }
+
+    // ==========================================
+    //  [기능 2] 버튼 입력 및 제작 수행
+    // ==========================================
+
+    public void InputNumber(int num)
+    {
+        typeIndex = num;
+        // 번호(가구 종류)를 선택하면, 즉시 해당 가구의 조건 텍스트를 UI에 띄워줍니다!
+        ShowCraftingConditionUI((FurnitureType)typeIndex);
+    }
+
+    public void CraftFurnitureAction()
+    {
         FurnitureType typeToCraft = (FurnitureType)typeIndex;
+        SurvivalSystemManager.instance.TryConsumeMaterials(typeToCraft);
 
-        // 플레이어 앞(forward) 방향으로 정해진 거리(spawnDistance)만큼 떨어진 위치 계산
+        // 재료 소모에 성공했을 때만 생성!
         Vector3 spawnPos = player.position + player.forward * spawnDistance;
-
-        // (선택) 가구가 공중에 뜨지 않게 Y축을 플레이어 발밑 높이로 대략 맞춰줍니다.
         spawnPos.y = player.position.y;
 
-        // 만들어둔 FurnitureController를 불러와서 가구 생성!
-        GameObject newFurniture = FurnitureController.instance.CraftFurniture(typeToCraft, spawnPos);
+        FurnitureController.instance.CraftFurniture(typeToCraft, spawnPos);
 
-        if (newFurniture != null)
+        // 제작 후 조건 텍스트 한 번 더 갱신 (수량이 늘어났으므로)
+        ShowCraftingConditionUI(typeToCraft);
+    }
+
+    public void EnterEditMode()
+    {
+        isEditMode = true;
+    }
+    public void ExitEditMode()
+    {
+        isEditMode = false;
+    }
+
+    public void CreateUI(GameObject UIinput) { UIinput.SetActive(true); }
+    public void RemoveUI(GameObject UIinput) { UIinput.SetActive(false); }
+    public void CreatTest(GameObject UIinput)
+    {
+        FurnitureType typeToCraft = (FurnitureType)typeIndex;
+
+        if (SurvivalSystemManager.instance.PossibleTest(typeToCraft))
         {
-            Debug.Log($"{typeToCraft} 가구가 캐릭터 앞에 성공적으로 생성되었습니다!");
+            UIinput.SetActive(true);
+        }
+        else
+        {
+            UIinput.SetActive(false);
+
         }
     }
 
 
     // ==========================================
-    //  [기능 2] 수정 모드 토글 및 드래그 로직
+    //  [기능 3] Input System 이벤트 
     // ==========================================
 
-    /// <summary>
-    /// UI의 '수정' 버튼을 누를 때마다 모드가 켜지고 꺼집니다.
-    /// </summary>
-    public void ToggleEditMode()
+    public void OnPointerPosition(InputAction.CallbackContext context)
     {
-        isEditMode = !isEditMode;
-        Debug.Log(isEditMode ? "수정 모드 ON" : "수정 모드 OFF");
+        if (!isEditMode) return;
 
-        // 수정 모드를 끄면 잡고 있던 가구도 즉시 놓습니다.
-        if (!isEditMode)
+        pointerPosition = context.ReadValue<Vector2>();
+
+        if (selectedFurniture != null)
         {
-            selectedFurniture = null;
+            bool isTwoFingerTouch = Touchscreen.current != null && Touchscreen.current.touches[1].press.isPressed;
+
+            if (!isTwoFingerTouch)
+            {
+                Ray ray = mainCamera.ScreenPointToRay(pointerPosition);
+                if (dragPlane.Raycast(ray, out float distance))
+                {
+                    Vector3 targetPos = ray.GetPoint(distance);
+                    selectedFurniture.transform.position = new Vector3(targetPos.x, selectedFurniture.transform.position.y, targetPos.z);
+                }
+            }
         }
     }
 
-    /// <summary>
-    /// 화면 터치/마우스 클릭을 통해 가구를 잡고 이동시키는 핵심 로직입니다.
-    /// </summary>
-    private void HandleFurnitureDrag()
+    public void OnTouchPress(InputAction.CallbackContext context)
     {
-        // [안전장치] UI 창(버튼, 패널 등)을 클릭하고 있다면 뒤에 있는 가구가 눌리지 않게 막습니다.
-        if (EventSystem.current.IsPointerOverGameObject() ||
-           (Input.touchCount > 0 && EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId)))
-            return;
+        if (!isEditMode) return;
 
-        // 1. 마우스/터치를 누르는 순간 (레이캐스트 쏘기)
-        if (Input.GetMouseButtonDown(0))
+        if (context.started)
         {
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+            if (IsPointerOverUI()) return;
 
-            // 카메라에서 레이를 쏴서 '가구 레이어(furnitureLayer)'에 맞는 물체가 있는지 검사
-            if (Physics.Raycast(ray, out hit, 100f, furnitureLayer))
+            Vector2 pressPos = Pointer.current.position.ReadValue();
+            Ray ray = mainCamera.ScreenPointToRay(pressPos);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 100f, furnitureLayer))
             {
                 selectedFurniture = hit.collider.gameObject;
-
-                // [핵심 공식] 선택한 가구의 Y축(높이)을 뚫고 지나가는 무한한 가상의 바닥(Plane)을 하나 생성합니다.
                 dragPlane = new Plane(Vector3.up, selectedFurniture.transform.position);
             }
         }
-
-        // 2. 누른 채로 드래그 중일 때 (가구 이동)
-        if (Input.GetMouseButton(0) && selectedFurniture != null)
-        {
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            float distance;
-
-            // 레이가 아까 만든 '가상의 바닥(Plane)'과 어느 위치에서 만나는지 계산
-            if (dragPlane.Raycast(ray, out distance))
-            {
-                // 마우스가 위치한 곳의 3D 좌표를 얻습니다.
-                Vector3 targetPos = ray.GetPoint(distance);
-
-                // 가구의 위치를 업데이트합니다. (X와 Z는 마우스를 따라가되, Y는 원래 가구 높이 고정)
-                selectedFurniture.transform.position = new Vector3(targetPos.x, selectedFurniture.transform.position.y, targetPos.z);
-            }
-        }
-
-        // 3. 마우스/터치를 떼는 순간 (가구 놓기)
-        if (Input.GetMouseButtonUp(0))
+        else if (context.canceled)
         {
             selectedFurniture = null;
         }
     }
 
-    public void CreateUI(GameObject UIinput)
+    public void OnSwipeRotate(InputAction.CallbackContext context)
     {
-        UIinput.SetActive(true);
+        if (isEditMode && selectedFurniture != null && context.performed)
+        {
+            Vector2 delta = context.ReadValue<Vector2>();
+            selectedFurniture.transform.Rotate(Vector3.up, -delta.x * rotSpeed, Space.World);
+        }
     }
 
-    public void RemoveUI(GameObject UIinput)
+    private bool IsPointerOverUI()
     {
-        UIinput.SetActive(false);
+        if (EventSystem.current == null || Pointer.current == null) return false;
+
+        PointerEventData eventData = new PointerEventData(EventSystem.current)
+        {
+            position = Pointer.current.position.ReadValue()
+        };
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        return results.Count > 0;
     }
-
-
-
 }
