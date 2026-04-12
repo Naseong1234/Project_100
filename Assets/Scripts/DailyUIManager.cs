@@ -1,16 +1,27 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using TMPro; // 추가됨!
-using System.Text; // 추가됨!
+using TMPro;
+using System.Text;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class DailyUIManager : MonoBehaviour
 {
+    // 2. 인스펙터 연결이나 싱글톤 대신, 스크립트 내부에서 찾아서 사용할 변수 선언
+    private GameManager gameManager;
+
     [Header("필수 연결 세팅")]
     public Transform player;
     public Camera mainCamera;
+
+    [Header("Status UI (인스펙터에서 연결해주세요)")]
+    public TextMeshProUGUI hp_Text;
+    public TextMeshProUGUI hunger_Text;
+    public TextMeshProUGUI mantal_Text;
+    public Image hp_Bar_Image;
+    public Image hunger_Bar_Image;
+    public Image mantal_Bar_Image;
 
     [Header("Inventory UI (인스펙터에서 연결해주세요)")]
     public TextMeshProUGUI woodText;
@@ -40,35 +51,59 @@ public class UIManager : MonoBehaviour
     {
         if (mainCamera == null) mainCamera = Camera.main;
 
-        // GameManager의 이벤트에 연결하여, 아이템이 바뀔 때마다 자동으로 UI가 갱신되게 만듭니다.
-        if (GameManager.instance != null)
-        {
-            GameManager.instance.OnInventoryChanged += UpdateInventoryUI;
-            UpdateInventoryUI(); // 게임 시작 시 초기화
-        }
-    }
+        // 3. 씬에서 이름이 "GameManager"인 오브젝트를 찾아, 그 안에 있는 GameManager 스크립트를 가져옵니다.
+        // 이 방법은 씬이 넘어간 직후에도 안전하게 기존 유지된 매니저를 다시 찾아올 수 있습니다.
+        GameObject gmObject = GameObject.Find("GameManager");
 
-    void Update()
-    {
-        
+        if (gmObject != null)
+        {
+            gameManager = gmObject.GetComponent<GameManager>();
+
+            // 찾은 gameManager 변수를 바탕으로 이벤트 구독
+            gameManager.OnInventoryChanged += UpdateInventoryUI;
+            gameManager.OnStatusChanged += UpdateStatusUI;
+
+            UpdateInventoryUI();
+            UpdateStatusUI();
+        }
+        else
+        {
+            Debug.LogError("씬에 'GameManager'라는 이름의 오브젝트가 없습니다!");
+        }
     }
 
     private void OnDestroy()
     {
-        // 씬이 넘어가거나 오브젝트가 파괴될 때 이벤트 연결을 해제해줍니다. (메모리 누수 방지)
-        if (GameManager.instance != null)
+        // 구독 해제 시에도 캐싱된 gameManager 변수 사용
+        if (gameManager != null)
         {
-            GameManager.instance.OnInventoryChanged -= UpdateInventoryUI;
+            gameManager.OnInventoryChanged -= UpdateInventoryUI;
+            gameManager.OnStatusChanged -= UpdateStatusUI;
         }
     }
 
     // ==========================================
-    //  [기능 1] 인벤토리 및 조건 UI 갱신 (추가된 부분)
+    //  UI 갱신 함수들
     // ==========================================
+
+    public void UpdateStatusUI()
+    {
+        if (gameManager == null) return;
+
+        if (hp_Text != null) hp_Text.text = gameManager.currentHealth.ToString();
+        if (hunger_Text != null) hunger_Text.text = gameManager.currentHunger.ToString();
+        if (mantal_Text != null) mantal_Text.text = gameManager.currentMental.ToString();
+
+        if (hp_Bar_Image != null) hp_Bar_Image.fillAmount = (float)gameManager.currentHealth / gameManager.maxHealth;
+        if (mantal_Bar_Image != null) mantal_Bar_Image.fillAmount = (float)gameManager.currentMental / gameManager.maxMental;
+        if (hunger_Bar_Image != null) hunger_Bar_Image.fillAmount = (float)gameManager.currentHunger / gameManager.maxHunger;
+    }
 
     public void UpdateInventoryUI()
     {
-        var inv = GameManager.instance.inventory;
+        if (gameManager == null) return;
+
+        var inv = gameManager.inventory;
         if (woodText) woodText.text = $"{inv[ItemType.Wood]}";
         if (leatherText) leatherText.text = $"{inv[ItemType.Leather]}";
         if (flowerText) flowerText.text = $"{inv[ItemType.Flower]}";
@@ -77,15 +112,20 @@ public class UIManager : MonoBehaviour
         if (meatText) meatText.text = $"{inv[ItemType.Meat]}";
     }
 
+    // ==========================================
+    //  제작 (Crafting) 관련 기능
+    // ==========================================
+
     public void ShowCraftingConditionUI(FurnitureType type)
     {
-        if (!GameManager.instance.recipes.ContainsKey(type)) return;
+        if (gameManager == null || !gameManager.recipes.ContainsKey(type)) return;
 
-        CraftingRecipe recipe = GameManager.instance.recipes[type];
-        var inv = GameManager.instance.inventory;
+        CraftingRecipe recipe = gameManager.recipes[type];
+        var inv = gameManager.inventory;
         StringBuilder sb = new StringBuilder();
 
-        // 1. 나무 조건 체크
+        int currentCount = FurnitureController.instance.GetPlayerFurnitureCount(type);
+
         if (recipe.reqWood > 0)
         {
             int currentWood = inv[ItemType.Wood];
@@ -93,7 +133,6 @@ public class UIManager : MonoBehaviour
             sb.AppendLine($"Wood need : {recipe.reqWood} / current : {currentWood} = {ox}");
         }
 
-        // 2. 가죽 조건 체크
         if (recipe.reqLeather > 0)
         {
             int currentLeather = inv[ItemType.Leather];
@@ -101,8 +140,6 @@ public class UIManager : MonoBehaviour
             sb.AppendLine($"Leather need : {recipe.reqLeather} / current : {currentLeather} = {ox}");
         }
 
-        // 3. 수량 조건 체크
-        int currentCount = FurnitureController.instance.GetPlayerFurnitureCount(type);
         string countOX = currentCount < recipe.maxAmount ? "O" : "X";
         sb.AppendLine($"Max Amount = {recipe.maxAmount} / current : {currentCount} = {countOX}");
 
@@ -112,63 +149,42 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // ==========================================
-    //  [기능 2] 버튼 입력 및 제작 수행
-    // ==========================================
-
     public void InputNumber(int num)
     {
         typeIndex = num;
-        // 번호(가구 종류)를 선택하면, 즉시 해당 가구의 조건 텍스트를 UI에 띄워줍니다!
         ShowCraftingConditionUI((FurnitureType)typeIndex);
     }
 
     public void CraftFurnitureAction()
     {
-        FurnitureType typeToCraft = (FurnitureType)typeIndex;
-        GameManager.instance.TryConsumeMaterials(typeToCraft);
+        if (gameManager == null) return;
 
-        // 재료 소모에 성공했을 때만 생성!
+        FurnitureType typeToCraft = (FurnitureType)typeIndex;
+        gameManager.TryConsumeMaterials(typeToCraft);
+
         Vector3 spawnPos = player.position + player.forward * spawnDistance;
         spawnPos.y = player.position.y;
 
         FurnitureController.instance.CraftFurniture(typeToCraft, spawnPos);
-
-        // 제작 후 조건 텍스트 한 번 더 갱신 (수량이 늘어났으므로)
         ShowCraftingConditionUI(typeToCraft);
     }
 
-    public void EnterEditMode()
-    {
-        isEditMode = true;
-    }
-    public void ExitEditMode()
-    {
-        isEditMode = false;
-    }
-
+    public void EnterEditMode() { isEditMode = true; }
+    public void ExitEditMode() { isEditMode = false; }
     public void CreateUI(GameObject UIinput) { UIinput.SetActive(true); }
     public void RemoveUI(GameObject UIinput) { UIinput.SetActive(false); }
+
     public void CreatTest(GameObject UIinput)
     {
+        if (gameManager == null) return;
+
         FurnitureType typeToCraft = (FurnitureType)typeIndex;
-
-        if (GameManager.instance.PossibleTest(typeToCraft))
-        {
-            UIinput.SetActive(true);
-        }
-        else
-        {
-            UIinput.SetActive(false);
-
-        }
+        if (gameManager.PossibleTest(typeToCraft)) UIinput.SetActive(true);
+        else UIinput.SetActive(false);
     }
 
-    
-
-
     // ==========================================
-    //  [기능 3] Input System 이벤트 
+    //  Input System 이벤트 
     // ==========================================
 
     public void OnPointerPosition(InputAction.CallbackContext context)
@@ -236,7 +252,6 @@ public class UIManager : MonoBehaviour
 
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
-
         return results.Count > 0;
     }
 }

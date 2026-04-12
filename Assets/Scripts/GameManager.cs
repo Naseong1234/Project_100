@@ -5,14 +5,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 채집물 종류
 public enum ItemType { Wood, Leather, Flower, Fruit, Mushroom, Meat }
 
 [System.Serializable]
 public class CraftingRecipe
 {
     public FurnitureType furnitureType;
-    public int maxAmount; // 최대 제작 가능 수량
+    public int maxAmount;
     public int reqWood = 0;
     public int reqLeather = 0;
 }
@@ -21,13 +20,12 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    // 아이템 수량이 변동될 때 UIManager에게 알려주기 위한 이벤트
     public event Action OnInventoryChanged;
+    public event Action OnStatusChanged;
 
     [Header("Survival Stats")]
     public int day = 1;
     public int maxDay = 100;
-
     public int maxHealth = 200;
     public int currentHealth = 200;
     public int maxHunger = 200;
@@ -35,29 +33,26 @@ public class GameManager : MonoBehaviour
     public int maxMental = 200;
     public int currentMental = 200;
 
-    [Header("UI 갱신 오브젝트 연결")]
-    public TextMeshProUGUI hp_Text;
-    public TextMeshProUGUI hunger_Text;
-    public TextMeshProUGUI mantal_Text;
-
-    public Image hp_Bar_Image;
-    public Image hunger_Bar_Image;
-    public Image mantal_Bar_Image;
-
-
-
     [Header("Inventory (Resources - Max 99)")]
     public Dictionary<ItemType, int> inventory = new Dictionary<ItemType, int>();
     public const int MAX_ITEM_CAPACITY = 99;
 
-    // UIManager에서 접근할 수 있도록 public으로 열어둡니다.
     public Dictionary<FurnitureType, CraftingRecipe> recipes = new Dictionary<FurnitureType, CraftingRecipe>();
-
     private bool isExploring = false;
 
     private void Awake()
     {
-        if (instance == null) instance = this;
+        if (instance == null)
+        {
+            instance = this;
+            // 1. 여기서 GameManager가 파괴되지 않도록 설정 (이미 완벽합니다!)
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         InitializeInventory();
         InitializeRecipes();
@@ -65,7 +60,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        StatusUpdate();
+        OnStatusChanged?.Invoke();
     }
 
     private void InitializeInventory()
@@ -83,42 +78,32 @@ public class GameManager : MonoBehaviour
         recipes.Add(FurnitureType.Barrel_Small, new CraftingRecipe { furnitureType = FurnitureType.Barrel_Small, maxAmount = 1, reqWood = 10 });
         recipes.Add(FurnitureType.Barrel_Big, new CraftingRecipe { furnitureType = FurnitureType.Barrel_Big, maxAmount = 1, reqWood = 15 });
         recipes.Add(FurnitureType.Barrel_drink, new CraftingRecipe { furnitureType = FurnitureType.Barrel_drink, maxAmount = 1, reqWood = 10 });
-
         recipes.Add(FurnitureType.Tent_Small, new CraftingRecipe { furnitureType = FurnitureType.Tent_Small, maxAmount = 1, reqWood = 5, reqLeather = 10 });
         recipes.Add(FurnitureType.Tent_Big, new CraftingRecipe { furnitureType = FurnitureType.Tent_Big, maxAmount = 1, reqWood = 10, reqLeather = 15 });
         recipes.Add(FurnitureType.Tent_Rest, new CraftingRecipe { furnitureType = FurnitureType.Tent_Rest, maxAmount = 1, reqWood = 10, reqLeather = 10 });
-
         recipes.Add(FurnitureType.Boxs, new CraftingRecipe { furnitureType = FurnitureType.Boxs, maxAmount = 1, reqWood = 20 });
-
         recipes.Add(FurnitureType.Chair1, new CraftingRecipe { furnitureType = FurnitureType.Chair1, maxAmount = 4, reqWood = 10 });
         recipes.Add(FurnitureType.Chair2, new CraftingRecipe { furnitureType = FurnitureType.Chair2, maxAmount = 4, reqWood = 15 });
-
         recipes.Add(FurnitureType.Table_Small, new CraftingRecipe { furnitureType = FurnitureType.Table_Small, maxAmount = 1, reqWood = 20 });
         recipes.Add(FurnitureType.Table_Big, new CraftingRecipe { furnitureType = FurnitureType.Table_Big, maxAmount = 1, reqWood = 30 });
         recipes.Add(FurnitureType.Table_Round, new CraftingRecipe { furnitureType = FurnitureType.Table_Round, maxAmount = 1, reqWood = 20 });
     }
 
-    // 아이템 획득/소비 (데이터 처리 후 UI 이벤트 호출)
     public void ModifyItem(ItemType type, int amount)
     {
         inventory[type] += amount;
         inventory[type] = Mathf.Clamp(inventory[type], 0, MAX_ITEM_CAPACITY);
-
-        // 데이터가 바뀌었으니 UI를 업데이트 하라고 신호를 보냅니다.
         OnInventoryChanged?.Invoke();
     }
 
-    // 실제 제작 시 호출할 함수 (재료 차감)
     public void TryConsumeMaterials(FurnitureType type)
     {
         CraftingRecipe recipe = recipes[type];
-
         ModifyItem(ItemType.Wood, -recipe.reqWood);
         ModifyItem(ItemType.Leather, -recipe.reqLeather);
-
     }
-    //제작 UI 생선전 테스트
-    public bool PossibleTest(FurnitureType type) 
+
+    public bool PossibleTest(FurnitureType type)
     {
         CraftingRecipe recipe = recipes[type];
 
@@ -129,9 +114,6 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-
-
-    // 생존/모험 로직
     public void StartNewDay(bool chooseExplore)
     {
         if (isExploring) return;
@@ -170,7 +152,11 @@ public class GameManager : MonoBehaviour
             case 0: ModifyItem(ItemType.Wood, 1); ModifyItem(ItemType.Fruit, 1); break;
             case 1: ModifyItem(ItemType.Leather, 1); break;
             case 2: ModifyItem(ItemType.Mushroom, 1); break;
-            case 3: ModifyItem(ItemType.Flower, 1); currentMental = Mathf.Clamp(currentMental + 2, 0, maxMental); break;
+            case 3:
+                ModifyItem(ItemType.Flower, 1);
+                currentMental = Mathf.Clamp(currentMental + 2, 0, maxMental);
+                OnStatusChanged?.Invoke();
+                break;
             case 4: ModifyItem(ItemType.Meat, 1); break;
         }
     }
@@ -193,6 +179,7 @@ public class GameManager : MonoBehaviour
         currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
         currentMental = Mathf.Clamp(currentMental, 0, maxMental);
 
+        OnStatusChanged?.Invoke();
         CheckGameOver();
         day++;
     }
@@ -208,6 +195,8 @@ public class GameManager : MonoBehaviour
             case ItemType.Meat: ModifyItem(foodType, -1); currentHunger += 10; break;
         }
         currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
+
+        OnStatusChanged?.Invoke();
     }
 
     private void CheckGameOver()
@@ -216,28 +205,10 @@ public class GameManager : MonoBehaviour
         else if (day > maxDay) Debug.Log("100일 생존에 성공했습니다!");
     }
 
-
-    
-
-    public void StatusUpdate()// 체력, 정신력, 멘탈을 회복하는 요소가 있을때만 발동하는 함수로 Butten으로 값이 변하는 경우에는 이놈을 부르면 되는걸로.
+    // DataSaveManager 등 외부에서 강제로 UI 갱신 이벤트를 발생시킬 때 사용합니다.
+    public void ForceUpdateUI()
     {
-
-        hp_Text.text = currentHealth.ToString();
-        hunger_Text.text = currentHunger.ToString();
-        mantal_Text.text = currentMental.ToString();
-
-        if (hp_Bar_Image != null)
-        {
-            hp_Bar_Image.fillAmount = currentHealth / maxHealth;
-        }
-
-        if (mantal_Bar_Image != null)
-        {
-            mantal_Bar_Image.fillAmount =currentMental / maxMental;
-        }
-        if (hunger_Bar_Image != null)
-        {
-            hunger_Bar_Image.fillAmount = currentHunger / maxHunger;
-        }
+        OnInventoryChanged?.Invoke();
+        OnStatusChanged?.Invoke();
     }
 }
