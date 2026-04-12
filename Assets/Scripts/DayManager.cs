@@ -62,7 +62,7 @@ public class DayManager : MonoBehaviour
         Sun_Image.SetActive(true);
         Night_Image.SetActive(false);
         Day_Text.text = $"Day - {GameManager.instance.day.ToString()}";
-        ++GameManager.instance.day;
+        //++GameManager.instance.day; 이 추가 부분은 나중에 일과 마무리 함수를 만들고 그때 추가하는 걸로 바꾸기
 
 
         directionalLight.colorTemperature = 7000f;

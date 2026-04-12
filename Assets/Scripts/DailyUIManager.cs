@@ -40,12 +40,23 @@ public class DailyUIManager : MonoBehaviour
 
     [Header("수정(Edit) 설정")]
     public LayerMask furnitureLayer;
-    public float rotSpeed = 0.5f;
+    float rotSpeed = 1f; //카메라 돌리는 속도
 
     private bool isEditMode = false;
     private GameObject selectedFurniture = null;
     private Plane dragPlane;
     private Vector2 pointerPosition;
+
+    [Header("수정 모드 세부 상태")]
+    public bool isMoveMode = false;
+    public bool isRotateMode = false;
+    public float moveSpeed = 0.01f; // 가구 이동 속도 (적절히 조절하세요)
+
+    // [여기에 추가] 터치가 UI에서 시작되었는지 추적하기 위한 변수
+    private int validTouchId = -1;
+    private bool isValidMouseDrag = false;
+
+
 
     void Start()
     {
@@ -70,6 +81,11 @@ public class DailyUIManager : MonoBehaviour
         {
             Debug.LogError("씬에 'GameManager'라는 이름의 오브젝트가 없습니다!");
         }
+    }
+    void Update()
+    {
+        // 매 프레임마다 드래그 입력을 검사합니다.
+        HandleScreenDrag();
     }
 
     private void OnDestroy()
@@ -184,64 +200,165 @@ public class DailyUIManager : MonoBehaviour
     }
 
     // ==========================================
-    //  Input System 이벤트 
+    //  모드 전환 버튼 이벤트 (UI OnClick에 연결)
     // ==========================================
-
-    public void OnPointerPosition(InputAction.CallbackContext context)
+    public void SetMoveMode()
     {
-        if (!isEditMode) return;
+        Debug.Log("이동 모드 ON");
+        isEditMode = true; //  [추가] 확실하게 수정 모드로 진입
+        isMoveMode = true;
+        isRotateMode = false;
+    }
 
-        pointerPosition = context.ReadValue<Vector2>();
+    public void SetRotateMode()
+    {
+        Debug.Log("회전 모드 ON");
+        isEditMode = true; //  [추가] 확실하게 수정 모드로 진입
+        isMoveMode = false;
+        isRotateMode = true;
+    }
 
-        if (selectedFurniture != null)
+    // ==========================================
+    //  핵심 조작 (OnSwipe)
+    // ==========================================
+    private void HandleScreenDrag()
+    {
+        Vector2 deltaPos = Vector2.zero;
+        Vector2 screenPosition = Vector2.zero;
+        bool isScreenDrag = false;
+        bool isTouchBegan = false;
+        bool isTouchEnded = false;
+
+        // 1. 모바일 (멀티 터치) 환경 처리
+        if (Input.touchCount > 0)
         {
-            bool isTwoFingerTouch = Touchscreen.current != null && Touchscreen.current.touches[1].press.isPressed;
-
-            if (!isTwoFingerTouch)
+            foreach (UnityEngine.Touch touch in Input.touches)
             {
-                Ray ray = mainCamera.ScreenPointToRay(pointerPosition);
-                if (dragPlane.Raycast(ray, out float distance))
+                // [변경] 손가락을 처음 댔을 때만 UI 검사
+                if (touch.phase == UnityEngine.TouchPhase.Began)
                 {
-                    Vector3 targetPos = ray.GetPoint(distance);
-                    selectedFurniture.transform.position = new Vector3(targetPos.x, selectedFurniture.transform.position.y, targetPos.z);
+                    // 조이스틱 같은 UI가 아닌, '맨땅'을 눌렀을 때만 이 손가락 번호(fingerId)를 기억합니다.
+                    if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                    {
+                        validTouchId = touch.fingerId;
+                        screenPosition = touch.position;
+                        isTouchBegan = true;
+                        break;
+                    }
+                }
+                // [변경] 맨땅을 눌렀던 '바로 그 손가락'이 움직일 때만 작동!
+                else if (touch.fingerId == validTouchId && touch.phase == UnityEngine.TouchPhase.Moved)
+                {
+                    deltaPos = touch.deltaPosition;
+                    screenPosition = touch.position;
+                    isScreenDrag = true;
+                    break;
+                }
+                // [변경] 손가락을 떼면 추적 번호 초기화
+                else if (touch.fingerId == validTouchId && (touch.phase == UnityEngine.TouchPhase.Ended || touch.phase == UnityEngine.TouchPhase.Canceled))
+                {
+                    isTouchEnded = true;
+                    validTouchId = -1;
+                    break;
                 }
             }
         }
-    }
-
-    public void OnTouchPress(InputAction.CallbackContext context)
-    {
-        if (!isEditMode) return;
-
-        if (context.started)
+        // 2. PC 에디터 (마우스) 환경 처리
+        else if (Mouse.current != null)
         {
-            if (IsPointerOverUI()) return;
-
-            Vector2 pressPos = Pointer.current.position.ReadValue();
-            Ray ray = mainCamera.ScreenPointToRay(pressPos);
-
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, furnitureLayer))
+            // 마우스를 막 눌렀을 때
+            if (Mouse.current.leftButton.wasPressedThisFrame)
             {
-                selectedFurniture = hit.collider.gameObject;
-                dragPlane = new Plane(Vector3.up, selectedFurniture.transform.position);
+                // UI 위가 아니라면 유효한 드래그로 인정
+                if (!IsPointerOverUI_Mouse())
+                {
+                    isValidMouseDrag = true;
+                    screenPosition = Mouse.current.position.ReadValue();
+                    isTouchBegan = true;
+                }
+            }
+            // 누른 채로 움직일 때 (유효한 드래그일 때만)
+            else if (Mouse.current.leftButton.isPressed)
+            {
+                if (isValidMouseDrag)
+                {
+                    deltaPos = Mouse.current.delta.ReadValue();
+                    screenPosition = Mouse.current.position.ReadValue();
+                    isScreenDrag = true;
+                }
+            }
+            // 마우스를 뗐을 때 초기화
+            else if (Mouse.current.leftButton.wasReleasedThisFrame)
+            {
+                if (isValidMouseDrag)
+                {
+                    isTouchEnded = true;
+                }
+                isValidMouseDrag = false;
             }
         }
-        else if (context.canceled)
+
+        // ==========================================
+        //  실제 조작 로직 (이 아래는 기존과 동일합니다)
+        // ==========================================
+
+        if (isTouchEnded)
         {
             selectedFurniture = null;
         }
-    }
 
-    public void OnSwipeRotate(InputAction.CallbackContext context)
-    {
-        if (isEditMode && selectedFurniture != null && context.performed)
+        if (isTouchBegan && isEditMode)
         {
-            Vector2 delta = context.ReadValue<Vector2>();
-            selectedFurniture.transform.Rotate(Vector3.up, -delta.x * rotSpeed, Space.World);
+            Ray ray = mainCamera.ScreenPointToRay(screenPosition);
+            RaycastHit hitInfo;
+
+            if (Physics.Raycast(ray, out hitInfo, Mathf.Infinity, furnitureLayer))
+            {
+                selectedFurniture = hitInfo.transform.gameObject;
+            }
+        }
+
+        if (!isScreenDrag) return;
+
+        // 3. 평상시 모드 (!isEditMode) - 카메라 회전
+        if (!isEditMode)
+        {
+            CameraController camController = mainCamera.GetComponent<CameraController>();
+            if (camController != null)
+            {
+                camController.AddRotation(deltaPos.x * rotSpeed * 0.1f);
+            }
+            return;
+        }
+
+        // 4. 수정 모드 (isEditMode) - 가구 조작
+        if (isEditMode && selectedFurniture != null)
+        {
+            Transform hitObject = selectedFurniture.transform;
+
+            if (isMoveMode)
+            {
+                Vector3 camRight = mainCamera.transform.right;
+                camRight.y = 0;
+                camRight.Normalize();
+
+                Vector3 camForward = mainCamera.transform.forward;
+                camForward.y = 0;
+                camForward.Normalize();
+
+                Vector3 moveDelta = (camRight * deltaPos.x + camForward * deltaPos.y) * moveSpeed;
+                hitObject.position += moveDelta;
+            }
+            else if (isRotateMode)
+            {
+                Vector3 currentAngle = hitObject.eulerAngles;
+                float nextY = currentAngle.y - (deltaPos.x * rotSpeed * 0.1f);
+                hitObject.eulerAngles = new Vector3(0f, nextY, 0f);
+            }
         }
     }
-
-    private bool IsPointerOverUI()
+    // 마우스 전용 UI 검사기로 이름과 역할을 분리합니다. (멀티 터치는 위에서 처리하므로)
+    private bool IsPointerOverUI_Mouse()
     {
         if (EventSystem.current == null || Pointer.current == null) return false;
 
@@ -254,4 +371,5 @@ public class DailyUIManager : MonoBehaviour
         EventSystem.current.RaycastAll(eventData, results);
         return results.Count > 0;
     }
+
 }

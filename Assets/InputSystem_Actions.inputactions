@@ -82,33 +82,15 @@
                     "name": "Sprint",
                     "type": "Button",
                     "id": "641cd816-40e6-41b4-8c3d-04687c349290",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "OnPointerPosition",
-                    "type": "Value",
-                    "id": "fc44ee3b-bec9-44dc-9818-72dc11ac5312",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "OnTouchPress",
-                    "type": "Button",
-                    "id": "b197fe2b-8d8a-4b89-a085-a7b606409bd9",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "OnSwipeRotate",
+                    "name": "Swipe",
                     "type": "Value",
-                    "id": "256792dc-d532-4cfb-8afc-08d6b96bd509",
+                    "id": "d138cea7-12b4-4a46-bd88-94c21d10a390",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
@@ -503,34 +485,12 @@
                 },
                 {
                     "name": "",
-                    "id": "3bff46d9-4ef1-4aaf-b9d2-e1b350f0f4f0",
-                    "path": "<Pointer>/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "OnPointerPosition",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "00e452a7-b948-4e01-ad43-29819a1003c5",
-                    "path": "<Pointer>/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "OnTouchPress",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "62f80808-fffe-44d2-af96-76897c76bc26",
+                    "id": "40eee91b-b68b-4fc0-afce-a975688eda52",
                     "path": "<Touchscreen>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "OnSwipeRotate",
+                    "action": "Swipe",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
