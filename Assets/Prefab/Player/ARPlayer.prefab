@@ -84,15 +84,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: f768d0c99b737344abbbcc043443bfe0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f768d0c99b737344abbbcc043443bfe0, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f768d0c99b737344abbbcc043443bfe0, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f768d0c99b737344abbbcc043443bfe0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -192,6 +192,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ARPlayerController
   animator: {fileID: 4502195889844661474}
   rotationSpeed: 7
+  speed: 1
 --- !u!54 &5352845754606174415
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -217,7 +218,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 116
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!136 &2458738080280866250
 CapsuleCollider:

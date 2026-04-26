@@ -33,7 +33,7 @@ public class CharacterSpawnManager : MonoBehaviour
         DetectGround();
     }
 
-    // [수정된 부분] UI 스폰 버튼의 OnClick 이벤트에 연결할 함수
+    // UI 스폰 버튼의 OnClick 이벤트에 연결할 함수
     public void OnSpawnButtonClicked()
     {
         // 버튼을 누를 때마다 true/false가 반전됨 (토글 기능)
@@ -76,26 +76,38 @@ public class CharacterSpawnManager : MonoBehaviour
                 return;
             }
 
-            // [수정된 부분] 인디케이터가 켜져 있고, 스폰 모드일 때만 터치 배치 작동
+            // 인디케이터가 켜져 있고, 스폰 모드일 때만 터치 배치 작동
             if (indicator.activeInHierarchy && isSpawnMode)
             {
+                // [핵심 해결 방법] 이미 소환된 캐릭터가 있고, 멀리 떨어져 있다면 파괴하고 새로 만듭니다.
+                // 이는 "소환되자마자 사라지는" 문제를 해결하기 위한 가장 확실한 방법입니다.
+                if (placedObject != null && Vector3.Distance(placedObject.transform.position, indicator.transform.position) > relocationDistance)
+                {
+                    Destroy(placedObject);
+                    placedObject = null; // null로 만들어 다음 if문에서 새로 생성하도록 함
+                }
+
+                // 캐릭터 최초 생성 또는 재소환 (placedObject가 null인 경우에만 작동)
                 if (placedObject == null)
                 {
-                    // 캐릭터 최초 생성
                     placedObject = Instantiate(myCharacter, indicator.transform.position, indicator.transform.rotation);
+
+                    // [팁] 소환되자마자 물리 속도를 초기화해줍니다. (Start에서 해줘도 됩니다)
+                    Rigidbody rb = placedObject.GetComponent<Rigidbody>();
+                    if (rb != null) rb.linearVelocity = Vector3.zero;
                 }
                 else
                 {
-                    // 캐릭터 재배치
-                    if (Vector3.Distance(placedObject.transform.position, indicator.transform.position) > relocationDistance)
-                    {
-                        placedObject.transform.SetPositionAndRotation(indicator.transform.position, indicator.transform.rotation);
-                    }
+                    // 근처에 있다면, 그냥 인디케이터 위치로 즉시 이동만 시킬 수도 있습니다.
+                    // 이 경우에도, 만약 비정상적인 물리 상태라면 속도를 초기화해줘야 "사라지는" 문제를 막을 수 있습니다.
+                    // placedObject.transform.SetPositionAndRotation(indicator.transform.position, indicator.transform.rotation);
+                    // Rigidbody rb = placedObject.GetComponent<Rigidbody>();
+                    // if (rb != null) rb.velocity = Vector3.zero; // 물리 속도 초기화
                 }
 
-                // [추가된 부분] 캐릭터가 성공적으로 생성되거나 배치된 후 스폰 모드 끄기
+                // 캐릭터가 성공적으로 생성되거나 배치된 후 스폰 모드 끄기
                 isSpawnMode = false;
-                indicator.SetActive(false); // 다음 Update 프레임까지 기다리지 않고 즉시 인디케이터 숨김
+                indicator.SetActive(false); // 즉시 인디케이터 숨김
             }
         }
     }
