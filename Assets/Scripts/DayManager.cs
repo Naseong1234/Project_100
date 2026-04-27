@@ -7,11 +7,13 @@ public class DayManager : MonoBehaviour
     private Light directionalLight;
     public GameObject Sun_Image;
     public GameObject Night_Image;
+    public GameObject Next_Image;
+    public GameObject Exploration_Image;
+
     public TextMeshProUGUI Day_Text;
 
-
     // static 변수를 사용하여 씬이 넘어갔다 와도 이전 상태를 기억하도록 합니다.
-    // 첫 로드 시 '밤'이 되도록 초기값을 true로 설정합니다.
+    // 첫 로드 시 '낮'이 되도록 초기값을 false로 설정합니다.
     private static bool isNextNight = false;
 
     void Start()
@@ -21,7 +23,7 @@ public class DayManager : MonoBehaviour
 
         if (directionalLight == null)
         {
-            Debug.LogWarning("SunsetManager가 있는 오브젝트에 Light 컴포넌트가 없습니다!");
+            Debug.LogWarning("DayManager가 있는 오브젝트에 Light 컴포넌트가 없습니다!");
             return;
         }
 
@@ -46,6 +48,10 @@ public class DayManager : MonoBehaviour
     {
         Sun_Image.SetActive(false);
         Night_Image.SetActive(true);
+
+        Next_Image.SetActive(true);
+        Exploration_Image.SetActive(false);
+
         Day_Text.text = $"Day - {GameManager.instance.day.ToString()}";
         directionalLight.colorTemperature = 20000f;
         directionalLight.intensity = 1f;
@@ -54,16 +60,22 @@ public class DayManager : MonoBehaviour
         // 그림자 강도가 0일 때는 아예 렌더링을 꺼버리는 것이 모바일 최적화(성능)에 좋습니다.
         directionalLight.shadows = LightShadows.None;
 
-        Debug.Log(" [SunsetManager] 현재 일상씬: 밤 (Night) 모드로 설정되었습니다.");
+        Debug.Log(" [DayManager] 현재 일상씬: 밤 (Night) 모드로 설정되었습니다.");
     }
 
     private void SetSun()
     {
+        // [추가된 부분 1] 낮이 될 때마다 생존 일수(day)를 1 증가시킵니다.
+        GameManager.instance.day++;
+
         Sun_Image.SetActive(true);
         Night_Image.SetActive(false);
-        Day_Text.text = $"Day - {GameManager.instance.day.ToString()}";
-        //++GameManager.instance.day; 이 추가 부분은 나중에 일과 마무리 함수를 만들고 그때 추가하는 걸로 바꾸기
 
+        Next_Image.SetActive(false);
+        Exploration_Image.SetActive(true);
+
+        // [수정된 부분] 증가된 날짜를 텍스트에 즉시 반영합니다.
+        Day_Text.text = $"Day - {GameManager.instance.day.ToString()}";
 
         directionalLight.colorTemperature = 7000f;
         directionalLight.intensity = 2.5f;
@@ -72,6 +84,12 @@ public class DayManager : MonoBehaviour
         // 낮이 되었으니 그림자를 다시 부드럽게 켜줍니다.
         directionalLight.shadows = LightShadows.Soft;
 
-        Debug.Log(" [SunsetManager] 현재 일상씬: 낮 (Day) 모드로 설정되었습니다.");
+        // [추가된 부분 2] 날짜가 올랐으므로 즉시 게임 데이터를 저장하여 기기에 반영합니다.
+        if (DataSaveManager.instance != null)
+        {
+            DataSaveManager.instance.SaveGameData();
+        }
+
+        Debug.Log($" [DayManager] 현재 일상씬: 낮 (Day) 모드로 설정되었습니다. 현재 생존 일수: {GameManager.instance.day}일");
     }
 }

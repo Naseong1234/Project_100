@@ -1922,53 +1922,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 474965993}
   m_CullTransparentMesh: 1
---- !u!1 &500834641
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 500834643}
-  - component: {fileID: 500834642}
-  m_Layer: 0
-  m_Name: TimeManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &500834642
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 500834641}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 645afb9a58576594ab1a73803d75ab65, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ExplorationTimer
-  timeLimit: 60
-  timerText: {fileID: 1865944414}
-  dailySceneName: DailyScene
---- !u!4 &500834643
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 500834641}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &516690764
 GameObject:
   m_ObjectHideFlags: 0
@@ -7102,7 +7055,7 @@ GameObject:
   - component: {fileID: 1865944415}
   - component: {fileID: 1865944414}
   m_Layer: 5
-  m_Name: Time_Text
+  m_Name: D-Day_Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8342,10 +8295,9 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 1315030056}
   - {fileID: 1353722176}
+  - {fileID: 1666171220}
+  - {fileID: 829874678}
   - {fileID: 1591740094}
   - {fileID: 1081708816}
   - {fileID: 595592716}
   - {fileID: 2081638763}
-  - {fileID: 1666171220}
-  - {fileID: 829874678}
-  - {fileID: 500834643}
