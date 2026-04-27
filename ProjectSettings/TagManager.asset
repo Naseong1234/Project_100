@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 3
   tags:
   - Ground
+  - Tree
+  - Animal
+  - Bushe
+  - Flower
+  - Mushroom
   layers:
   - Default
   - TransparentFX

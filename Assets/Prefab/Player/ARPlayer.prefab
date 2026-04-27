@@ -84,15 +84,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: f768d0c99b737344abbbcc043443bfe0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.1
+      value: 0.17
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f768d0c99b737344abbbcc043443bfe0, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.1
+      value: 0.17
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f768d0c99b737344abbbcc043443bfe0, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.1
+      value: 0.17
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f768d0c99b737344abbbcc043443bfe0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -193,6 +193,7 @@ MonoBehaviour:
   animator: {fileID: 4502195889844661474}
   rotationSpeed: 7
   speed: 1
+  isGatheringMode: 0
 --- !u!54 &5352845754606174415
 Rigidbody:
   m_ObjectHideFlags: 0
