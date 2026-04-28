@@ -101,9 +101,20 @@ public class DataSaveManager : MonoBehaviour
         GameManager.instance.inventory[ItemType.Mushroom] = data.mushroom;
         GameManager.instance.inventory[ItemType.Meat] = data.meat;
 
+        // 체력, 배고픔 등 인벤토리 UI 갱신
         GameManager.instance.ForceUpdateUI();
 
-        // [해결 포인트 3] 마찬가지로 싱글톤으로 가구 매니저가 있는지 확인하고 복원합니다.
+        // =======================================================
+        // [핵심 해결 코드] DayManager의 시작 순서와 상관없이, 
+        // 데이터 로드가 끝나는 즉시 날짜 UI를 진짜 데이터로 덮어씌웁니다.
+        // =======================================================
+        DayManager dayManager = FindFirstObjectByType<DayManager>();
+        if (dayManager != null && dayManager.Day_Text != null)
+        {
+            dayManager.Day_Text.text = $"Day - {data.day}";
+        }
+
+        // 가구 매니저 복원
         if (FurnitureController.instance != null)
         {
             FurnitureController.instance.RestoreFurniture(data.placedFurniture);
@@ -145,4 +156,19 @@ public class DataSaveManager : MonoBehaviour
 
         Debug.LogWarning(" [DataSaveManager] 스탯, 인벤토리, 가구 배치까지 모두 완벽하게 리셋되었습니다!");
     }
+    // 1. 유저가 X 버튼을 누르거나 창을 닫아 강제 종료할 때 자동으로 불리는 함수
+    private void OnApplicationQuit()
+    {
+        SaveGameData();
+    }
+
+    // 2. 스마트폰 환경 필수: 전화가 오거나 홈 버튼을 눌러 앱이 뒤로 내려갈 때 자동으로 불리는 함수
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus) // 앱이 백그라운드로 내려가서 일시정지 상태가 됨
+        {
+            SaveGameData();
+        }
+    }
+
 }

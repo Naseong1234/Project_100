@@ -146,6 +146,7 @@ public class ARPlayerController : MonoBehaviour
                 break;
             case "Flower":
                 GameManager.instance.ModifyItem(ItemType.Flower, 1);
+                GameManager.instance.currentMental += 1;
                 isCollected = true;
                 break;
             case "Mushroom":

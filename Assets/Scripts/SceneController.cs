@@ -15,4 +15,8 @@ public class SceneController : MonoBehaviour
         // 이동한 새 씬의 DataSaveManager가 Start()에서 알아서 데이터를 불러올 것입니다.
         SceneManager.LoadScene(sceneName);
     }
+    public void LoginSceneChange(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
 }

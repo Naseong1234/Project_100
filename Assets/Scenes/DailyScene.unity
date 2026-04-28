@@ -2143,7 +2143,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 291567017}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 190323435}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: EatFoodByName
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Flower
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -4162,7 +4174,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 576291204}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 190323435}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: EatFoodByName
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Fruit
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &593983901
 GameObject:
   m_ObjectHideFlags: 0
@@ -5289,11 +5313,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1315030056}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 472.5, y: 127}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -30, y: -20}
   m_SizeDelta: {x: 65, y: 64}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 1, y: 1}
 --- !u!114 &782071725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5338,9 +5362,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1666171219}
-        m_TargetAssemblyTypeName: DataSaveManager, Assembly-CSharp
-        m_MethodName: ResetGameData
+      - m_Target: {fileID: 1315030057}
+        m_TargetAssemblyTypeName: DailyUIManager, Assembly-CSharp
+        m_MethodName: Quit
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7201,7 +7225,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 980073669}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 190323435}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: EatFoodByName
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Mushroom
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &1058588273
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11513,7 +11549,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1789099408}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 190323435}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: EatFoodByName
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Meat
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1792274200
 GameObject:
   m_ObjectHideFlags: 0
@@ -12188,11 +12236,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1315030056}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -20, y: -20}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -20}
   m_SizeDelta: {x: 200, y: 50}
-  m_Pivot: {x: 1, y: 1}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1865944414
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12247,7 +12295,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 4
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0

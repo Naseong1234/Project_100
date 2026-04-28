@@ -1,9 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using TMPro;
-using System.Text;
-using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class DailyUIManager : MonoBehaviour
@@ -370,6 +371,35 @@ public class DailyUIManager : MonoBehaviour
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
         return results.Count > 0;
+    }
+
+    public void Quit()
+    {
+        // 1. DataSaveManager가 씬에 잘 있는지 확인 후 저장 실행
+        if (DataSaveManager.instance != null)
+        {
+            DataSaveManager.instance.SaveGameData();
+            Debug.Log("종료 전 데이터 저장을 지시했습니다.");
+        }
+        else
+        {
+            Debug.LogError("DataSaveManager를 찾을 수 없어 저장을 건너뜁니다!");
+        }
+
+        // 2. 즉시 끄지 않고, 0.2초 대기하는 코루틴 실행
+        StartCoroutine(QuitRoutine());
+    }
+
+    private IEnumerator QuitRoutine()
+    {
+        // PlayerPrefs.Save()가 디스크에 파일 쓰기를 완료할 시간을 벌어줍니다.
+        yield return new WaitForSeconds(0.2f);
+
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
     }
 
 }

@@ -38,7 +38,6 @@ public class GameManager : MonoBehaviour
     public const int MAX_ITEM_CAPACITY = 99;
 
     public Dictionary<FurnitureType, CraftingRecipe> recipes = new Dictionary<FurnitureType, CraftingRecipe>();
-    private bool isExploring = false;
 
     private void Awake()
     {
@@ -114,62 +113,11 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    public void StartNewDay(bool chooseExplore)
-    {
-        if (isExploring) return;
-        if (chooseExplore) StartCoroutine(ExploreRoutine());
-        else { MaintainBase(); EndDay(false); }
-    }
-
-    private IEnumerator ExploreRoutine()
-    {
-        isExploring = true;
-        float exploreTime = 5f;
-        float elapsedTime = 0f;
-        float eventInterval = 1f;
-        float nextEventTime = eventInterval;
-
-        while (elapsedTime < exploreTime)
-        {
-            elapsedTime += Time.deltaTime;
-            if (elapsedTime >= nextEventTime)
-            {
-                TriggerRandomEncounter();
-                nextEventTime += eventInterval;
-            }
-            yield return null;
-        }
-
-        isExploring = false;
-        EndDay(true);
-    }
-
-    private void TriggerRandomEncounter()
-    {
-        int randomEncounter = UnityEngine.Random.Range(0, 6);
-        switch (randomEncounter)
-        {
-            case 0: ModifyItem(ItemType.Wood, 1); ModifyItem(ItemType.Fruit, 1); break;
-            case 1: ModifyItem(ItemType.Leather, 1); break;
-            case 2: ModifyItem(ItemType.Mushroom, 1); break;
-            case 3:
-                ModifyItem(ItemType.Flower, 1);
-                currentMental = Mathf.Clamp(currentMental + 2, 0, maxMental);
-                OnStatusChanged?.Invoke();
-                break;
-            case 4: ModifyItem(ItemType.Meat, 1); break;
-        }
-    }
-
-    private void MaintainBase() { /* 내실 다지기 */ }
-
-    private void EndDay(bool didExplore)
+    public void EndDay() // 나중에 밤 상태에서 Next를 누를 때 호출하는 걸로 이걸 연결하면 됨
     {
         currentHealth -= 5;
         currentHunger -= 5;
         currentMental -= 5;
-
-        if (didExplore) { currentHealth -= 5; currentHunger -= 5; }
 
         if (currentHunger >= 80) currentHealth += 15;
         else if (currentHunger >= 50) currentHealth += 10;
@@ -184,6 +132,20 @@ public class GameManager : MonoBehaviour
         day++;
     }
 
+    // 인스펙터 버튼 연결용 함수
+    public void EatFoodByName(string itemName)
+    {
+        // 입력한 문자열을 Enum으로 변환 시도
+        if (Enum.TryParse(itemName, true, out ItemType parsedItem))
+        {
+            EatFood(parsedItem);
+        }
+        else
+        {
+            Debug.LogWarning($"[{itemName}]은(는) 올바른 ItemType이 아닙니다.");
+        }
+    }
+
     public void EatFood(ItemType foodType)
     {
         if (inventory[foodType] <= 0) return;
@@ -193,6 +155,7 @@ public class GameManager : MonoBehaviour
             case ItemType.Mushroom: ModifyItem(foodType, -1); currentHunger += 2; break;
             case ItemType.Fruit: ModifyItem(foodType, -1); currentHunger += 5; break;
             case ItemType.Meat: ModifyItem(foodType, -1); currentHunger += 10; break;
+            case ItemType.Flower: ModifyItem(foodType, -1); currentHunger += 1; break;
         }
         currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
 
