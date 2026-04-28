@@ -146,7 +146,13 @@ public class ARPlayerController : MonoBehaviour
                 break;
             case "Flower":
                 GameManager.instance.ModifyItem(ItemType.Flower, 1);
-                GameManager.instance.currentMental += 1;
+                // 1. 정신력 수치 증가
+                GameManager.instance.currentMental += 4;
+                // 2. 최대 정신력(maxMental)을 넘지 않도록 안전장치 적용
+                GameManager.instance.currentMental = Mathf.Clamp(GameManager.instance.currentMental, 0, GameManager.instance.maxMental);
+                // 3. 변경된 수치가 화면(UI)에 즉시 반영되도록 신호 보내기
+                GameManager.instance.ForceUpdateUI();
+
                 isCollected = true;
                 break;
             case "Mushroom":

@@ -131,6 +131,17 @@ public class FurnitureController : MonoBehaviour
 
         furnitureToCraft.transform.position = spawnPosition;
         furnitureToCraft.SetActive(true);
+
+        // --- 추가된 부분: 가구 제작 시 멘탈 30 증가 ---
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.currentMental += 30;
+            // 최대 멘탈 수치(maxMental)를 넘지 않도록 제한
+            GameManager.instance.currentMental = Mathf.Clamp(GameManager.instance.currentMental, 0, GameManager.instance.maxMental);
+
+            // UI에 즉시 반영되도록 이벤트 호출
+            GameManager.instance.ForceUpdateUI();
+        }
     }
 
     public void ReturnFurniture(FurnitureType type, GameObject furnitureObj)

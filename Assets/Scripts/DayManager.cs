@@ -13,11 +13,7 @@ public class DayManager : MonoBehaviour
     public TextMeshProUGUI Day_Text;
 
     // static 변수를 사용하여 씬이 넘어갔다 와도 이전 상태를 기억하도록 합니다.
-    private static bool isNextNight = false;
-
-    // [추가된 핵심 변수] 게임 접속 후 '최초'로 일상씬에 들어왔는지 판별합니다.
-    public static bool isFirstLogin = true;
-
+    public static bool isNight = false;
     void Start()
     {
         directionalLight = GetComponent<Light>();
@@ -30,7 +26,7 @@ public class DayManager : MonoBehaviour
 
         directionalLight.useColorTemperature = true;
 
-        if (isNextNight)
+        if (isNight)
         {
             SetNight();
         }
@@ -39,7 +35,7 @@ public class DayManager : MonoBehaviour
             SetSun();
         }
 
-        isNextNight = !isNextNight;
+        isNight = !isNight;
     }
 
     private void SetNight()
@@ -62,23 +58,6 @@ public class DayManager : MonoBehaviour
 
     private void SetSun()
     {
-        // [수정된 로직] 최초 로그인 시에는 날짜 증가 로직을 건너뜁니다.
-        if (isFirstLogin)
-        {
-            Debug.Log(" [DayManager] 최초 로그인 감지: 날짜를 증가시키지 않습니다.");
-            isFirstLogin = false; // 다음번 낮이 올 때는 정상적으로 날짜가 오르도록 false로 바꿔줍니다.
-        }
-        else
-        {
-            // 탐험을 마치고 돌아왔거나, 밤에서 낮으로 넘어갈 때만 날짜를 올립니다.
-            GameManager.instance.day++;
-
-            // 날짜가 올랐을 때만 저장하도록 이사 왔습니다.
-            if (DataSaveManager.instance != null)
-            {
-                DataSaveManager.instance.SaveGameData();
-            }
-        }
 
         Sun_Image.SetActive(true);
         Night_Image.SetActive(false);

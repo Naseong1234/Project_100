@@ -19,4 +19,17 @@ public class SceneController : MonoBehaviour
     {
         SceneManager.LoadScene(sceneName);
     }
+
+    public void CallEndDay()
+    {
+        // 진짜 GameManager(살아남은 녀석)가 존재한다면 EndDay 실행!
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.EndDay();
+        }
+        else
+        {
+            Debug.LogWarning("GameManager를 찾을 수 없습니다!");
+        }
+    }
 }

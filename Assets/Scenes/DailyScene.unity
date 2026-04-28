@@ -1263,11 +1263,11 @@ MonoBehaviour:
   day: 1
   maxDay: 100
   maxHealth: 200
-  currentHealth: 200
+  currentHealth: 150
   maxHunger: 200
-  currentHunger: 200
+  currentHunger: 150
   maxMental: 200
-  currentMental: 200
+  currentMental: 150
 --- !u!4 &190323436
 Transform:
   m_ObjectHideFlags: 0
@@ -2144,8 +2144,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 190323435}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1315030057}
+        m_TargetAssemblyTypeName: DailyUIManager, Assembly-CSharp
         m_MethodName: EatFoodByName
         m_Mode: 5
         m_Arguments:
@@ -3779,13 +3779,13 @@ MonoBehaviour:
     prefab: {fileID: 9041987684880885959, guid: ba63c93b1ecc8d642843bd46a55b1a70, type: 3}
     maxCount: 1
   - type: 3
-    prefab: {fileID: 656467911275774780, guid: 71266fdb3fd1a45489f670c94c113ca1, type: 3}
+    prefab: {fileID: 7020179066815148305, guid: 41145ef17b440a2429ea3318081ec7b4, type: 3}
     maxCount: 1
   - type: 4
-    prefab: {fileID: 6707388740314194034, guid: c1d48a7b398f5e44a828b80ad781d48b, type: 3}
+    prefab: {fileID: 3187530535356989688, guid: a87f9bd2d4eee38499a8930ec0da4614, type: 3}
     maxCount: 1
   - type: 5
-    prefab: {fileID: 2787697850275765097, guid: 33940a1913134fb43a57414f13169428, type: 3}
+    prefab: {fileID: 5712962612345409318, guid: 812282c67cbeb92448517b855dc91ee1, type: 3}
     maxCount: 1
   - type: 6
     prefab: {fileID: 6902135231230162918, guid: 9aedfddaf4169eb4a832578220e18476, type: 3}
@@ -4175,8 +4175,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 190323435}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1315030057}
+        m_TargetAssemblyTypeName: DailyUIManager, Assembly-CSharp
         m_MethodName: EatFoodByName
         m_Mode: 5
         m_Arguments:
@@ -5293,7 +5293,7 @@ GameObject:
   - component: {fileID: 782071726}
   - component: {fileID: 782071725}
   m_Layer: 5
-  m_Name: Reset
+  m_Name: Exit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6575,7 +6575,7 @@ MonoBehaviour:
   m_FillMethod: 1
   m_FillAmount: 1
   m_FillClockwise: 1
-  m_FillOrigin: 1
+  m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
 --- !u!1001 &919851786
@@ -7226,8 +7226,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 190323435}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1315030057}
+        m_TargetAssemblyTypeName: DailyUIManager, Assembly-CSharp
         m_MethodName: EatFoodByName
         m_Mode: 5
         m_Arguments:
@@ -7919,14 +7919,14 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1461504340}
         m_TargetAssemblyTypeName: SceneController, Assembly-CSharp
-        m_MethodName: SceneChange
-        m_Mode: 5
+        m_MethodName: CallEndDay
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: DailyScene
+          m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!1001 &1174327750
@@ -8837,6 +8837,7 @@ RectTransform:
   - {fileID: 1865944413}
   - {fileID: 911177451}
   - {fileID: 782071724}
+  - {fileID: 2089440590}
   - {fileID: 1212800288}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -9912,10 +9913,10 @@ MonoBehaviour:
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
-  m_FillMethod: 4
+  m_FillMethod: 1
   m_FillAmount: 1
   m_FillClockwise: 1
-  m_FillOrigin: 2
+  m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1460484786
@@ -11550,8 +11551,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 190323435}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1315030057}
+        m_TargetAssemblyTypeName: DailyUIManager, Assembly-CSharp
         m_MethodName: EatFoodByName
         m_Mode: 5
         m_Arguments:
@@ -12090,7 +12091,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1831015085
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12261,7 +12262,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: D - Day
+  m_text: Day - 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -13412,6 +13413,138 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3366098202559829810, guid: 1e001f9985f991443a055d4f4fc58c4e, type: 3}
   m_PrefabInstance: {fileID: 2086793787}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2089440589
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2089440590}
+  - component: {fileID: 2089440593}
+  - component: {fileID: 2089440592}
+  - component: {fileID: 2089440591}
+  m_Layer: 5
+  m_Name: Reset
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &2089440590
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089440589}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1315030056}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -30, y: -100}
+  m_SizeDelta: {x: 65, y: 64}
+  m_Pivot: {x: 1, y: 1}
+--- !u!114 &2089440591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089440589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 2089440592}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1666171219}
+        m_TargetAssemblyTypeName: DataSaveManager, Assembly-CSharp
+        m_MethodName: ResetGameData
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &2089440592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089440589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 5716cca2fa73c714388affec7322504b, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &2089440593
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089440589}
+  m_CullTransparentMesh: 1
 --- !u!1001 &2095317032
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13562,7 +13695,7 @@ MonoBehaviour:
   m_FillMethod: 1
   m_FillAmount: 1
   m_FillClockwise: 1
-  m_FillOrigin: 1
+  m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
 --- !u!1001 &2102914065

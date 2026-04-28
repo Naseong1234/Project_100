@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public enum ItemType { Wood, Leather, Flower, Fruit, Mushroom, Meat }
@@ -27,11 +28,11 @@ public class GameManager : MonoBehaviour
     public int day = 1;
     public int maxDay = 100;
     public int maxHealth = 200;
-    public int currentHealth = 200;
+    public int currentHealth = 150;
     public int maxHunger = 200;
-    public int currentHunger = 200;
+    public int currentHunger = 150;
     public int maxMental = 200;
-    public int currentMental = 200;
+    public int currentMental = 150;
 
     [Header("Inventory (Resources - Max 99)")]
     public Dictionary<ItemType, int> inventory = new Dictionary<ItemType, int>();
@@ -65,11 +66,11 @@ public class GameManager : MonoBehaviour
     private void InitializeInventory()
     {
         inventory[ItemType.Wood] = 50;
-        inventory[ItemType.Leather] = 0;
+        inventory[ItemType.Leather] = 50;
         inventory[ItemType.Flower] = 0;
         inventory[ItemType.Fruit] = 0;
         inventory[ItemType.Mushroom] = 0;
-        inventory[ItemType.Meat] = 0;
+        inventory[ItemType.Meat] = 10;
     }
 
     private void InitializeRecipes()
@@ -113,15 +114,15 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    public void EndDay() // 나중에 밤 상태에서 Next를 누를 때 호출하는 걸로 이걸 연결하면 됨
+    public void EndDay()
     {
-        currentHealth -= 5;
-        currentHunger -= 5;
-        currentMental -= 5;
+        currentHealth -= 10;
+        currentHunger -= 10;
+        currentMental -= 10;
 
-        if (currentHunger >= 80) currentHealth += 15;
-        else if (currentHunger >= 50) currentHealth += 10;
-        else currentHealth += 5;
+        if (currentHunger >= 160) currentHealth += 15; 
+        else if (currentHunger >= 100) currentHealth += 10; 
+        else currentHealth += 5;                            
 
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
@@ -129,38 +130,24 @@ public class GameManager : MonoBehaviour
 
         OnStatusChanged?.Invoke();
         CheckGameOver();
-        day++;
+        
+        // 날짜 증가
+        day++; 
+
+        // ===============================================
+        // 추가된 로직: 하루 결산이 모두 끝난 후 데이터를 저장하고 씬 전환
+        // ===============================================
+        
+        // 1. 최신 상태로 갱신된 데이터를 기기에 저장
+        if (DataSaveManager.instance != null)
+        {
+            DataSaveManager.instance.SaveGameData();
+        }
+
+        // 2. 씬 전환 (SceneController에 연결할 필요 없이 직접 전환)
+        SceneManager.LoadScene("DailyScene"); 
     }
 
-    // 인스펙터 버튼 연결용 함수
-    public void EatFoodByName(string itemName)
-    {
-        // 입력한 문자열을 Enum으로 변환 시도
-        if (Enum.TryParse(itemName, true, out ItemType parsedItem))
-        {
-            EatFood(parsedItem);
-        }
-        else
-        {
-            Debug.LogWarning($"[{itemName}]은(는) 올바른 ItemType이 아닙니다.");
-        }
-    }
-
-    public void EatFood(ItemType foodType)
-    {
-        if (inventory[foodType] <= 0) return;
-
-        switch (foodType)
-        {
-            case ItemType.Mushroom: ModifyItem(foodType, -1); currentHunger += 2; break;
-            case ItemType.Fruit: ModifyItem(foodType, -1); currentHunger += 5; break;
-            case ItemType.Meat: ModifyItem(foodType, -1); currentHunger += 10; break;
-            case ItemType.Flower: ModifyItem(foodType, -1); currentHunger += 1; break;
-        }
-        currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
-
-        OnStatusChanged?.Invoke();
-    }
 
     private void CheckGameOver()
     {

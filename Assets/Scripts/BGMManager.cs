@@ -7,10 +7,10 @@ public class BGMManager : MonoBehaviour
 
     public static BGMManager instance = null;
 
-    public AudioClip LoginMusic;
-    public AudioClip DailyMusuc;
-    public AudioClip ExplorationMusuc;
-
+    public AudioClip Login_BGM;
+    public AudioClip Daily_Sun_BGM;
+    public AudioClip Daily_Night_BGM;
+    public AudioClip Exploration_BGM;
 
     private AudioSource audioSource;
 
@@ -46,25 +46,26 @@ public class BGMManager : MonoBehaviour
         switch (scene.name)
         {
             case "LoginScene":
-                if (audioSource.clip != LoginMusic)
+                if (audioSource.clip != Login_BGM)
                 {
-                    PlayMusic(LoginMusic, 0.3f);
+                    PlayMusic(Login_BGM, 0.3f);
                 }
                 break;
 
-            case "GuidedScene":
-                if (audioSource.clip != LoginMusic)
+            case "DailyScene": 
+                // DayManager의 isNight 상태를 확인하여 BGM 분기 처리
+                if (DayManager.isNight)
                 {
-                    PlayMusic(LoginMusic, 0.3f);
+                    PlayMusic(Daily_Night_BGM, 0.2f); // 밤일 경우
                 }
-                break;
-
-            case "DailyScene":
-                PlayMusic(DailyMusuc, 0.2f);
+                else
+                {
+                    PlayMusic(Daily_Sun_BGM, 0.2f);   // 낮일 경우
+                }
                 break;
 
             case "ExplorationScene":
-                PlayMusic(ExplorationMusuc, 0.2f);
+                PlayMusic(Exploration_BGM, 0.2f);
                 break;
 
             default:
@@ -72,6 +73,7 @@ public class BGMManager : MonoBehaviour
                 break;
         }
     }
+
     void PlayMusic(AudioClip clip, float volume)
     {
         if (clip != null)

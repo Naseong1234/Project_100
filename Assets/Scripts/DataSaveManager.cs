@@ -39,9 +39,7 @@ public class DataSaveManager : MonoBehaviour
 
     private void Start()
     {
-        // [해결 포인트 1] static 변수(isLoadedOnce)를 삭제했습니다.
-        // 이제 탐험씬이든 일상씬이든, 씬이 로드되고 Start가 실행되면 
-        // 무조건 기기에 저장된 '가장 최신 데이터'를 불러옵니다.
+        //ResetGameData(); // <--- 이 줄을 임시로 추가합니다.
         LoadGameData();
     }
 
@@ -134,16 +132,16 @@ public class DataSaveManager : MonoBehaviour
         if (GameManager.instance != null)
         {
             GameManager.instance.day = 1;
-            GameManager.instance.currentHealth = GameManager.instance.maxHealth;
-            GameManager.instance.currentHunger = GameManager.instance.maxHunger;
-            GameManager.instance.currentMental = GameManager.instance.maxMental;
+            GameManager.instance.currentHealth = 150;
+            GameManager.instance.currentHunger = 150;
+            GameManager.instance.currentMental = 150;
 
             GameManager.instance.inventory[ItemType.Wood] = 50;
-            GameManager.instance.inventory[ItemType.Leather] = 0;
+            GameManager.instance.inventory[ItemType.Leather] = 50;
             GameManager.instance.inventory[ItemType.Flower] = 0;
             GameManager.instance.inventory[ItemType.Fruit] = 0;
             GameManager.instance.inventory[ItemType.Mushroom] = 0;
-            GameManager.instance.inventory[ItemType.Meat] = 0;
+            GameManager.instance.inventory[ItemType.Meat] = 10;
 
             GameManager.instance.ForceUpdateUI();
         }

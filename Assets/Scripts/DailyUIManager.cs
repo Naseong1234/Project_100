@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -352,9 +353,11 @@ public class DailyUIManager : MonoBehaviour
             }
             else if (isRotateMode)
             {
-                Vector3 currentAngle = hitObject.eulerAngles;
-                float nextY = currentAngle.y - (deltaPos.x * rotSpeed * 0.1f);
-                hitObject.eulerAngles = new Vector3(0f, nextY, 0f);
+                // 이동한 마우스/터치 값만큼 회전량을 계산합니다.
+                float rotationAmount = -(deltaPos.x * rotSpeed * 0.1f);
+
+                // x, z축은 건드리지 않고, 월드(Space.World) Y축 기준으로만 회전시킵니다.
+                hitObject.Rotate(0f, rotationAmount, 0f, Space.World);
             }
         }
     }
@@ -372,6 +375,60 @@ public class DailyUIManager : MonoBehaviour
         EventSystem.current.RaycastAll(eventData, results);
         return results.Count > 0;
     }
+
+    // ==========================================
+    //  아이템 섭취 관련 기능
+    // ==========================================
+
+    // 인스펙터 버튼 연결용 함수
+    public void EatFoodByName(string itemName)
+    {
+        // 입력한 문자열을 Enum으로 변환 시도
+        if (Enum.TryParse(itemName, true, out ItemType parsedItem))
+        {
+            EatFood(parsedItem);
+        }
+        else
+        {
+            Debug.LogWarning($"[{itemName}]은(는) 올바른 ItemType이 아닙니다.");
+        }
+    }
+
+    public void EatFood(ItemType foodType)
+    {
+        // gameManager를 찾지 못했거나, 해당 아이템이 0개 이하라면 실행하지 않음
+        if (gameManager == null || gameManager.inventory[foodType] <= 0) return;
+
+        switch (foodType)
+        {
+            case ItemType.Mushroom:
+                gameManager.ModifyItem(foodType, -1);
+                gameManager.currentHunger += 2;
+                break;
+            case ItemType.Fruit:
+                gameManager.ModifyItem(foodType, -1);
+                gameManager.currentHunger += 5;
+                break;
+            case ItemType.Meat:
+                gameManager.ModifyItem(foodType, -1);
+                gameManager.currentHunger += 10;
+                break;
+            case ItemType.Flower:
+                gameManager.ModifyItem(foodType, -1);
+                gameManager.currentHunger += 1;
+                break;
+        }
+
+        // 최대 허기 수치를 넘지 않도록 제한
+        gameManager.currentHunger = Mathf.Clamp(gameManager.currentHunger, 0, gameManager.maxHunger);
+
+        // C#에서는 외부 클래스에서 이벤트를 직접 Invoke 할 수 없으므로,
+        // GameManager에 만들어둔 ForceUpdateUI()를 호출하여 UI와 상태를 즉시 갱신합니다.
+        gameManager.ForceUpdateUI();
+    }
+
+
+
 
     public void Quit()
     {
