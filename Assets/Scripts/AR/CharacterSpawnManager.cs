@@ -12,9 +12,6 @@ public class CharacterSpawnManager : MonoBehaviour
     GameObject placedObject = null;
     public float rotSpeed = -0.1f;
     public float relocationDistance = 1.0f;
-    //미세한 카메라 위치변경시에도 모델링의 위치가 변동되는 민감함을 조정하기 위해,
-    // 사용자가 화면을 터치했을때 모델링의 기존위치와 새로 배치될 위치간의 거리를 측정해 일정거리
-    // 떨어져야만 재배치 되도록 수정
     ARRaycastManager arManager;
     List<ARRaycastHit> hitInfos = new List<ARRaycastHit>();
 
@@ -79,8 +76,7 @@ public class CharacterSpawnManager : MonoBehaviour
             // 인디케이터가 켜져 있고, 스폰 모드일 때만 터치 배치 작동
             if (indicator.activeInHierarchy && isSpawnMode)
             {
-                // [핵심 해결 방법] 이미 소환된 캐릭터가 있고, 멀리 떨어져 있다면 파괴하고 새로 만듭니다.
-                // 이는 "소환되자마자 사라지는" 문제를 해결하기 위한 가장 확실한 방법입니다.
+                // 이미 소환된 캐릭터가 있고, 멀리 떨어져 있다면 파괴하고 새로 만듭니다.
                 if (placedObject != null && Vector3.Distance(placedObject.transform.position, indicator.transform.position) > relocationDistance)
                 {
                     Destroy(placedObject);
@@ -92,17 +88,9 @@ public class CharacterSpawnManager : MonoBehaviour
                 {
                     placedObject = Instantiate(myCharacter, indicator.transform.position, indicator.transform.rotation);
 
-                    // [팁] 소환되자마자 물리 속도를 초기화해줍니다. (Start에서 해줘도 됩니다)
+                    // 소환되자마자 물리 속도를 초기화해줍니다.
                     Rigidbody rb = placedObject.GetComponent<Rigidbody>();
                     if (rb != null) rb.linearVelocity = Vector3.zero;
-                }
-                else
-                {
-                    // 근처에 있다면, 그냥 인디케이터 위치로 즉시 이동만 시킬 수도 있습니다.
-                    // 이 경우에도, 만약 비정상적인 물리 상태라면 속도를 초기화해줘야 "사라지는" 문제를 막을 수 있습니다.
-                    // placedObject.transform.SetPositionAndRotation(indicator.transform.position, indicator.transform.rotation);
-                    // Rigidbody rb = placedObject.GetComponent<Rigidbody>();
-                    // if (rb != null) rb.velocity = Vector3.zero; // 물리 속도 초기화
                 }
 
                 // 캐릭터가 성공적으로 생성되거나 배치된 후 스폰 모드 끄기

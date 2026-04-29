@@ -12,7 +12,6 @@ public class DayManager : MonoBehaviour
 
     public TextMeshProUGUI Day_Text;
 
-    // static 변수를 사용하여 씬이 넘어갔다 와도 이전 상태를 기억하도록 합니다.
     public static bool isNight = false;
     void Start()
     {
@@ -20,7 +19,6 @@ public class DayManager : MonoBehaviour
 
         if (directionalLight == null)
         {
-            Debug.LogWarning("DayManager가 있는 오브젝트에 Light 컴포넌트가 없습니다!");
             return;
         }
 
@@ -53,7 +51,6 @@ public class DayManager : MonoBehaviour
 
         directionalLight.shadows = LightShadows.None;
 
-        Debug.Log(" [DayManager] 현재 일상씬: 밤 (Night) 모드로 설정되었습니다.");
     }
 
     private void SetSun()
@@ -70,7 +67,5 @@ public class DayManager : MonoBehaviour
         directionalLight.shadowStrength = 0.5f;
 
         directionalLight.shadows = LightShadows.Soft;
-
-        Debug.Log($" [DayManager] 현재 일상씬: 낮 (Day) 모드로 설정되었습니다. 현재 생존 일수: {GameManager.instance.day}일");
     }
 }

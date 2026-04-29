@@ -10,7 +10,6 @@ using UnityEngine.UI;
 
 public class DailyUIManager : MonoBehaviour
 {
-    // 2. 인스펙터 연결이나 싱글톤 대신, 스크립트 내부에서 찾아서 사용할 변수 선언
     private GameManager gameManager;
 
     [Header("필수 연결 세팅")]
@@ -46,15 +45,13 @@ public class DailyUIManager : MonoBehaviour
 
     private bool isEditMode = false;
     private GameObject selectedFurniture = null;
-    private Plane dragPlane;
-    private Vector2 pointerPosition;
 
     [Header("수정 모드 세부 상태")]
     public bool isMoveMode = false;
     public bool isRotateMode = false;
-    public float moveSpeed = 0.01f; // 가구 이동 속도 (적절히 조절하세요)
+    public float moveSpeed = 0.01f; // 가구 이동 속도 
 
-    // [여기에 추가] 터치가 UI에서 시작되었는지 추적하기 위한 변수
+    // 터치가 UI에서 시작되었는지 추적하기 위한 변수
     private int validTouchId = -1;
     private bool isValidMouseDrag = false;
 
@@ -64,15 +61,12 @@ public class DailyUIManager : MonoBehaviour
     {
         if (mainCamera == null) mainCamera = Camera.main;
 
-        // 3. 씬에서 이름이 "GameManager"인 오브젝트를 찾아, 그 안에 있는 GameManager 스크립트를 가져옵니다.
-        // 이 방법은 씬이 넘어간 직후에도 안전하게 기존 유지된 매니저를 다시 찾아올 수 있습니다.
         GameObject gmObject = GameObject.Find("GameManager");
 
         if (gmObject != null)
         {
             gameManager = gmObject.GetComponent<GameManager>();
 
-            // 찾은 gameManager 변수를 바탕으로 이벤트 구독
             gameManager.OnInventoryChanged += UpdateInventoryUI;
             gameManager.OnStatusChanged += UpdateStatusUI;
 
@@ -86,7 +80,6 @@ public class DailyUIManager : MonoBehaviour
     }
     void Update()
     {
-        // 매 프레임마다 드래그 입력을 검사합니다.
         HandleScreenDrag();
     }
 
@@ -99,10 +92,6 @@ public class DailyUIManager : MonoBehaviour
             gameManager.OnStatusChanged -= UpdateStatusUI;
         }
     }
-
-    // ==========================================
-    //  UI 갱신 함수들
-    // ==========================================
 
     public void UpdateStatusUI()
     {
@@ -130,9 +119,6 @@ public class DailyUIManager : MonoBehaviour
         if (meatText) meatText.text = $"{inv[ItemType.Meat]}";
     }
 
-    // ==========================================
-    //  제작 (Crafting) 관련 기능
-    // ==========================================
 
     public void ShowCraftingConditionUI(FurnitureType type)
     {
@@ -201,13 +187,11 @@ public class DailyUIManager : MonoBehaviour
         else UIinput.SetActive(false);
     }
 
-    // ==========================================
-    //  모드 전환 버튼 이벤트 (UI OnClick에 연결)
-    // ==========================================
+    //  모드 전환 버튼 이벤트
     public void SetMoveMode()
     {
         Debug.Log("이동 모드 ON");
-        isEditMode = true; //  [추가] 확실하게 수정 모드로 진입
+        isEditMode = true; // 수정 모드로 진입
         isMoveMode = true;
         isRotateMode = false;
     }
@@ -215,14 +199,11 @@ public class DailyUIManager : MonoBehaviour
     public void SetRotateMode()
     {
         Debug.Log("회전 모드 ON");
-        isEditMode = true; //  [추가] 확실하게 수정 모드로 진입
+        isEditMode = true; // 수정 모드로 진입
         isMoveMode = false;
         isRotateMode = true;
     }
 
-    // ==========================================
-    //  핵심 조작 (OnSwipe)
-    // ==========================================
     private void HandleScreenDrag()
     {
         Vector2 deltaPos = Vector2.zero;
@@ -231,15 +212,15 @@ public class DailyUIManager : MonoBehaviour
         bool isTouchBegan = false;
         bool isTouchEnded = false;
 
-        // 1. 모바일 (멀티 터치) 환경 처리
+        //  모바일  환경 처리
         if (Input.touchCount > 0)
         {
             foreach (UnityEngine.Touch touch in Input.touches)
             {
-                // [변경] 손가락을 처음 댔을 때만 UI 검사
+                // 손가락을 처음 댔을 때만 UI 검사
                 if (touch.phase == UnityEngine.TouchPhase.Began)
                 {
-                    // 조이스틱 같은 UI가 아닌, '맨땅'을 눌렀을 때만 이 손가락 번호(fingerId)를 기억합니다.
+                    // 조이스틱 같은 UI가 아닌, '맨땅'을 눌렀을 때만 이 손가락 번호를 기억합니다.
                     if (!EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                     {
                         validTouchId = touch.fingerId;
@@ -248,7 +229,6 @@ public class DailyUIManager : MonoBehaviour
                         break;
                     }
                 }
-                // [변경] 맨땅을 눌렀던 '바로 그 손가락'이 움직일 때만 작동!
                 else if (touch.fingerId == validTouchId && touch.phase == UnityEngine.TouchPhase.Moved)
                 {
                     deltaPos = touch.deltaPosition;
@@ -256,7 +236,6 @@ public class DailyUIManager : MonoBehaviour
                     isScreenDrag = true;
                     break;
                 }
-                // [변경] 손가락을 떼면 추적 번호 초기화
                 else if (touch.fingerId == validTouchId && (touch.phase == UnityEngine.TouchPhase.Ended || touch.phase == UnityEngine.TouchPhase.Canceled))
                 {
                     isTouchEnded = true;
@@ -265,7 +244,7 @@ public class DailyUIManager : MonoBehaviour
                 }
             }
         }
-        // 2. PC 에디터 (마우스) 환경 처리
+        // 2. PC  환경 처리
         else if (Mouse.current != null)
         {
             // 마우스를 막 눌렀을 때
@@ -300,10 +279,6 @@ public class DailyUIManager : MonoBehaviour
             }
         }
 
-        // ==========================================
-        //  실제 조작 로직 (이 아래는 기존과 동일합니다)
-        // ==========================================
-
         if (isTouchEnded)
         {
             selectedFurniture = null;
@@ -322,7 +297,7 @@ public class DailyUIManager : MonoBehaviour
 
         if (!isScreenDrag) return;
 
-        // 3. 평상시 모드 (!isEditMode) - 카메라 회전
+        // 평상시 모드 (!isEditMode) - 카메라 회전
         if (!isEditMode)
         {
             CameraController camController = mainCamera.GetComponent<CameraController>();
@@ -333,7 +308,7 @@ public class DailyUIManager : MonoBehaviour
             return;
         }
 
-        // 4. 수정 모드 (isEditMode) - 가구 조작
+        // 수정 모드 (isEditMode) - 가구 조작
         if (isEditMode && selectedFurniture != null)
         {
             Transform hitObject = selectedFurniture.transform;
@@ -353,15 +328,15 @@ public class DailyUIManager : MonoBehaviour
             }
             else if (isRotateMode)
             {
-                // 이동한 마우스/터치 값만큼 회전량을 계산합니다.
+                // 이동한 마우스/터치 값만큼 회전량을 계산
                 float rotationAmount = -(deltaPos.x * rotSpeed * 0.1f);
 
-                // x, z축은 건드리지 않고, 월드(Space.World) Y축 기준으로만 회전시킵니다.
+                // x, z축은 건드리지 않고, 월드(Space.World) Y축 기준으로만 회전
                 hitObject.Rotate(0f, rotationAmount, 0f, Space.World);
             }
         }
     }
-    // 마우스 전용 UI 검사기로 이름과 역할을 분리합니다. (멀티 터치는 위에서 처리하므로)
+    // 마우스 전용 UI 검사기로 이름과 역할을 분리 (멀티 터치는 위에서 처리하므로)
     private bool IsPointerOverUI_Mouse()
     {
         if (EventSystem.current == null || Pointer.current == null) return false;
@@ -376,11 +351,7 @@ public class DailyUIManager : MonoBehaviour
         return results.Count > 0;
     }
 
-    // ==========================================
     //  아이템 섭취 관련 기능
-    // ==========================================
-
-    // 인스펙터 버튼 연결용 함수
     public void EatFoodByName(string itemName)
     {
         // 입력한 문자열을 Enum으로 변환 시도
@@ -396,7 +367,6 @@ public class DailyUIManager : MonoBehaviour
 
     public void EatFood(ItemType foodType)
     {
-        // gameManager를 찾지 못했거나, 해당 아이템이 0개 이하라면 실행하지 않음
         if (gameManager == null || gameManager.inventory[foodType] <= 0) return;
 
         switch (foodType)
@@ -422,8 +392,6 @@ public class DailyUIManager : MonoBehaviour
         // 최대 허기 수치를 넘지 않도록 제한
         gameManager.currentHunger = Mathf.Clamp(gameManager.currentHunger, 0, gameManager.maxHunger);
 
-        // C#에서는 외부 클래스에서 이벤트를 직접 Invoke 할 수 없으므로,
-        // GameManager에 만들어둔 ForceUpdateUI()를 호출하여 UI와 상태를 즉시 갱신합니다.
         gameManager.ForceUpdateUI();
     }
 
@@ -432,18 +400,16 @@ public class DailyUIManager : MonoBehaviour
 
     public void Quit()
     {
-        // 1. DataSaveManager가 씬에 잘 있는지 확인 후 저장 실행
         if (DataSaveManager.instance != null)
         {
             DataSaveManager.instance.SaveGameData();
-            Debug.Log("종료 전 데이터 저장을 지시했습니다.");
         }
         else
         {
             Debug.LogError("DataSaveManager를 찾을 수 없어 저장을 건너뜁니다!");
         }
 
-        // 2. 즉시 끄지 않고, 0.2초 대기하는 코루틴 실행
+        // 즉시 끄지 않고, 0.2초 대기하는 코루틴 실행
         StartCoroutine(QuitRoutine());
     }
 

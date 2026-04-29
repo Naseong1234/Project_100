@@ -74,10 +74,7 @@ public class FurnitureController : MonoBehaviour
         }
     }
 
-    // ==========================================
     //  DataSaveManager 전용 함수 (추출 및 복원)
-    // ==========================================
-
     // 현재 플레이어가 지은 가구들의 위치/각도 데이터를 리스트로 만들어 반환합니다.
     public List<FurnitureSaveData> GetActiveFurnitureData()
     {
@@ -117,10 +114,7 @@ public class FurnitureController : MonoBehaviour
         }
     }
 
-    // ==========================================
     //  제작 및 관리 함수
-    // ==========================================
-
     public void CraftFurniture(FurnitureType type, Vector3 spawnPosition)
     {
         if (!availablePool.ContainsKey(type) || availablePool[type].Count == 0) return;
@@ -132,14 +126,12 @@ public class FurnitureController : MonoBehaviour
         furnitureToCraft.transform.position = spawnPosition;
         furnitureToCraft.SetActive(true);
 
-        // --- 추가된 부분: 가구 제작 시 멘탈 30 증가 ---
         if (GameManager.instance != null)
         {
+            //가구 제작 시 멘탈 30 증가
             GameManager.instance.currentMental += 30;
-            // 최대 멘탈 수치(maxMental)를 넘지 않도록 제한
             GameManager.instance.currentMental = Mathf.Clamp(GameManager.instance.currentMental, 0, GameManager.instance.maxMental);
 
-            // UI에 즉시 반영되도록 이벤트 호출
             GameManager.instance.ForceUpdateUI();
         }
     }
@@ -160,18 +152,15 @@ public class FurnitureController : MonoBehaviour
         return 0;
     }
 
-    // ==========================================
     //  개발자용 / 초기화용: 모든 가구 즉시 회수
-    // ==========================================
     public void ClearAllFurniture()
     {
-        // 플레이어가 지어둔 모든 가구(playerPool)를 순회합니다.
+        // 플레이어가 지어둔 모든 가구(playerPool)를 순회
         foreach (var kvp in playerPool)
         {
             FurnitureType type = kvp.Key;
             List<GameObject> placedList = kvp.Value;
 
-            // 리스트의 요소를 지우면서 반복문을 돌 때는 뒤에서부터(역순) 도는 것이 안전합니다.
             for (int i = placedList.Count - 1; i >= 0; i--)
             {
                 GameObject obj = placedList[i];
@@ -182,6 +171,5 @@ public class FurnitureController : MonoBehaviour
             // 플레이어 소유 리스트를 완전히 비웁니다.
             placedList.Clear();
         }
-        Debug.Log("맵에 배치된 모든 가구가 즉시 치워졌습니다!");
     }
 }

@@ -34,7 +34,6 @@ public class GameManager : MonoBehaviour
     public int maxMental = 200;
     public int currentMental = 150;
 
-    [Header("Inventory (Resources - Max 99)")]
     public Dictionary<ItemType, int> inventory = new Dictionary<ItemType, int>();
     public const int MAX_ITEM_CAPACITY = 99;
 
@@ -45,7 +44,7 @@ public class GameManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            // 1. 여기서 GameManager가 파괴되지 않도록 설정 (이미 완벽합니다!)
+            // GameManager가 파괴되지 않도록 설정
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -134,17 +133,15 @@ public class GameManager : MonoBehaviour
         // 날짜 증가
         day++; 
 
-        // ===============================================
-        // 추가된 로직: 하루 결산이 모두 끝난 후 데이터를 저장하고 씬 전환
-        // ===============================================
+        // 하루 결산이 모두 끝난 후 데이터를 저장하고 씬 전환
         
-        // 1. 최신 상태로 갱신된 데이터를 기기에 저장
+        // 갱신된 데이터를 기기에 저장
         if (DataSaveManager.instance != null)
         {
             DataSaveManager.instance.SaveGameData();
         }
 
-        // 2. 씬 전환 (SceneController에 연결할 필요 없이 직접 전환)
+        // 씬 전환
         SceneManager.LoadScene("DailyScene"); 
     }
 
@@ -155,7 +152,7 @@ public class GameManager : MonoBehaviour
         else if (day > maxDay) Debug.Log("100일 생존에 성공했습니다!");
     }
 
-    // DataSaveManager 등 외부에서 강제로 UI 갱신 이벤트를 발생시킬 때 사용합니다.
+    // DataSaveManager 등 외부에서 강제로 UI 갱신 이벤트를 발생시킬 때 사용
     public void ForceUpdateUI()
     {
         OnInventoryChanged?.Invoke();

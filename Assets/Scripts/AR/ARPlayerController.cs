@@ -15,7 +15,7 @@ public class ARPlayerController : MonoBehaviour
 
     [Header("채집 시스템")]
     public bool isGatheringMode = false;      // 10초간 활성화될 변수
-    GameObject successUI;    // 채집 성공 UI (인스펙터에서 연결)
+    GameObject successUI;    // 채집 성공 UI
     private float collisionTimer = 0f;       // 접촉 시간을 잴 타이머
     private GameObject currentTarget = null; // 현재 접촉 중인 오브젝트
 
@@ -30,18 +30,16 @@ public class ARPlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         mainCam = Camera.main;
 
-        // 1. 조이스틱 찾기
+        // 조이스틱 찾기
         GameObject joystickObj = GameObject.Find("Fixed Joystick");
         if (joystickObj != null) joystick = joystickObj.GetComponent<Joystick>();
 
-        // ==========================================
-        // [수정된 부분] 비활성화된 successUI 찾기
-        // ==========================================
-        // 항상 켜져 있는 부모(Canvas)를 먼저 찾습니다.
+        // 비활성화된 successUI 찾기
+        // 항상 켜져 있는 부모(Canvas)를 먼저 찾고
         GameObject canvasObj = GameObject.Find("Canvas");
         if (canvasObj != null)
         {
-            // 부모의 transform.Find를 사용하면 꺼져있는 자식도 이름으로 찾을 수 있습니다.
+            // 부모의 transform.Find를 사용하면 꺼져있는 자식도 이름으로 찾을 수 있음
             Transform successTransform = canvasObj.transform.Find("successUI");
 
             if (successTransform != null)
@@ -51,11 +49,6 @@ public class ARPlayerController : MonoBehaviour
             }
         }
 
-        // 혹시라도 못 찾았을 때를 대비한 디버그 로그
-        if (successUI == null)
-        {
-            Debug.LogError("Canvas 아래에서 successUI를 찾을 수 없습니다!");
-        }
     }
 
     void Update()
@@ -63,9 +56,7 @@ public class ARPlayerController : MonoBehaviour
         playerMove();
     }
 
-    // ==========================================
     // 채집 버튼 이벤트 (UI 버튼에 연결하세요)
-    // ==========================================
     public void OnGatheringButtonClicked()
     {
         if (!isGatheringMode)
@@ -87,9 +78,7 @@ public class ARPlayerController : MonoBehaviour
         currentTarget = null;
     }
 
-    // ==========================================
     // 물리 접촉 로직 (Trigger Stay)
-    // ==========================================
     private void OnTriggerStay(Collider other)
     {
         // 채집 모드일 때만 작동
@@ -135,15 +124,18 @@ public class ARPlayerController : MonoBehaviour
                 GameManager.instance.ModifyItem(ItemType.Wood, 2);
                 isCollected = true;
                 break;
+
             case "Animal":
                 GameManager.instance.ModifyItem(ItemType.Meat, 2);
                 GameManager.instance.ModifyItem(ItemType.Leather, 1);
                 isCollected = true;
                 break;
+
             case "Bushe":
                 GameManager.instance.ModifyItem(ItemType.Fruit, 1);
                 isCollected = true;
                 break;
+
             case "Flower":
                 GameManager.instance.ModifyItem(ItemType.Flower, 1);
                 // 1. 정신력 수치 증가
@@ -155,8 +147,8 @@ public class ARPlayerController : MonoBehaviour
 
                 isCollected = true;
                 break;
+
             case "Mushroom":
-                // 버섯도 아이템 타입의 Mushroom으로 연결 (사용자 요청에 따라 Flower로 할 수도 있음)
                 GameManager.instance.ModifyItem(ItemType.Mushroom, 1);
                 isCollected = true;
                 break;
@@ -184,7 +176,7 @@ public class ARPlayerController : MonoBehaviour
         }
     }
 
-    // 기존 플레이어 이동 로직 (유지)
+    // 기존 플레이어 이동 로직
     void playerMove()
     {
         if (joystick == null) return;

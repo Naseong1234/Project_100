@@ -39,7 +39,7 @@ public class DataSaveManager : MonoBehaviour
 
     private void Start()
     {
-        //ResetGameData(); // <--- 이 줄을 임시로 추가합니다.
+        //ResetGameData();
         LoadGameData();
     }
 
@@ -47,7 +47,7 @@ public class DataSaveManager : MonoBehaviour
     {
         GameSaveData data = new GameSaveData();
 
-        // 탐험씬에서 저장할 때 일상씬의 가구 데이터가 날아가지 않도록, 기존 세이브를 먼저 덮어씌웁니다.
+        // 탐험씬에서 저장할 때 일상씬의 가구 데이터가 날아가지 않도록, 기존 세이브를 먼저 덮어씌우기
         if (PlayerPrefs.HasKey("GameSave"))
         {
             string existingJson = PlayerPrefs.GetString("GameSave");
@@ -66,8 +66,6 @@ public class DataSaveManager : MonoBehaviour
         data.mushroom = GameManager.instance.inventory[ItemType.Mushroom];
         data.meat = GameManager.instance.inventory[ItemType.Meat];
 
-        // [해결 포인트 2] Find 대신 싱글톤 인스턴스가 현재 씬에 존재하는지 직접 묻습니다.
-        // 일상씬이라면 갱신하고, 탐험씬이라면 기존 가구 데이터(data)를 건드리지 않고 그대로 유지합니다.
         if (FurnitureController.instance != null)
         {
             data.placedFurniture = FurnitureController.instance.GetActiveFurnitureData();
@@ -77,7 +75,6 @@ public class DataSaveManager : MonoBehaviour
         PlayerPrefs.SetString("GameSave", json);
         PlayerPrefs.Save();
 
-        Debug.Log("[DataSaveManager] 게임 데이터를 성공적으로 저장했습니다!");
     }
 
     public void LoadGameData()
@@ -102,10 +99,7 @@ public class DataSaveManager : MonoBehaviour
         // 체력, 배고픔 등 인벤토리 UI 갱신
         GameManager.instance.ForceUpdateUI();
 
-        // =======================================================
-        // [핵심 해결 코드] DayManager의 시작 순서와 상관없이, 
-        // 데이터 로드가 끝나는 즉시 날짜 UI를 진짜 데이터로 덮어씌웁니다.
-        // =======================================================
+        // 데이터 로드가 끝나는 즉시 날짜 UI를 진짜 데이터로 덮어씌우기
         DayManager dayManager = FindFirstObjectByType<DayManager>();
         if (dayManager != null && dayManager.Day_Text != null)
         {
@@ -117,18 +111,15 @@ public class DataSaveManager : MonoBehaviour
         {
             FurnitureController.instance.RestoreFurniture(data.placedFurniture);
         }
-
-        Debug.Log("[DataSaveManager] 게임 데이터를 성공적으로 불러왔습니다!");
     }
 
     [ContextMenu(" 개발자용: 모든 데이터 초기화 (Reset)")]
     public void ResetGameData()
     {
-        // 1. 기기 세이브 날리기
         PlayerPrefs.DeleteKey("GameSave");
         PlayerPrefs.Save();
 
-        // 2. GameManager 스탯 및 아이템 초기화
+        //  GameManager 스탯 및 아이템 초기화
         if (GameManager.instance != null)
         {
             GameManager.instance.day = 1;
@@ -146,21 +137,19 @@ public class DataSaveManager : MonoBehaviour
             GameManager.instance.ForceUpdateUI();
         }
 
-        // 3. [핵심] 일상씬에 가구 컨트롤러가 있다면, 화면에 보이는 가구도 즉시 치워버림
+        // 일상씬에 가구 컨트롤러가 있다면, 화면에 보이는 가구도 즉시 치워버림
         if (FurnitureController.instance != null)
         {
             FurnitureController.instance.ClearAllFurniture();
         }
 
-        Debug.LogWarning(" [DataSaveManager] 스탯, 인벤토리, 가구 배치까지 모두 완벽하게 리셋되었습니다!");
     }
-    // 1. 유저가 X 버튼을 누르거나 창을 닫아 강제 종료할 때 자동으로 불리는 함수
     private void OnApplicationQuit()
     {
         SaveGameData();
     }
 
-    // 2. 스마트폰 환경 필수: 전화가 오거나 홈 버튼을 눌러 앱이 뒤로 내려갈 때 자동으로 불리는 함수
+    // 스마트폰 환경 필수: 전화가 오거나 홈 버튼을 눌러 앱이 뒤로 내려갈 때 자동으로 불리는 함수
     private void OnApplicationPause(bool pauseStatus)
     {
         if (pauseStatus) // 앱이 백그라운드로 내려가서 일시정지 상태가 됨
